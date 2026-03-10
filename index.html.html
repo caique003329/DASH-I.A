@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard IA vs Operação — DNR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--border:#30363d;
+  --accent:#2e7de9;--accent2:#1a4f9c;--text:#e6edf3;--muted:#8b949e;
+  --green:#3fb950;--orange:#d29922;--red:#f85149;
+  --ia:#00c8ff;--op:#00e5a0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh;}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--surface);border-bottom:1px solid var(--border);}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-logo{height:44px;width:auto;}
+.header-divider{width:1px;height:36px;background:var(--border);}
+.header-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+.header-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.upload-area{display:flex;align-items:center;gap:10px;}
+.upload-btn{background:var(--accent2);border:1px solid var(--accent);color:var(--text);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .2s;}
+.upload-btn:hover{background:var(--accent);}
+#fileInput{display:none;}
+.upload-label{font-size:11px;color:var(--muted);}
+
+.filters{display:flex;gap:12px;padding:12px 28px;background:var(--surface2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+.filter-group{display:flex;flex-direction:column;gap:3px;}
+.filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.filter-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:5px;font-family:'Barlow',sans-serif;font-size:12px;cursor:pointer;min-width:150px;}
+.filter-select:focus{outline:none;border-color:var(--accent);}
+
+.main{padding:20px 28px;display:flex;flex-direction:column;gap:24px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+.kpi-card.ia::before{background:var(--ia);}
+.kpi-card.op::before{background:var(--op);}
+.kpi-card.green::before{background:var(--green);}
+.kpi-card.orange::before{background:var(--orange);}
+.kpi-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.kpi-value{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--text);}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.kpi-compare{display:flex;gap:12px;margin-top:6px;font-size:11px;}
+.kpi-ia{color:var(--ia);font-weight:700;}
+.kpi-op{color:var(--op);font-weight:700;}
+
+/* DUAL FUNNEL */
+.dual-funnel-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px 36px;}
+.dual-funnel-grid{display:grid;grid-template-columns:1fr 160px 1fr;gap:0;align-items:center;}
+.funnel-col{display:flex;flex-direction:column;align-items:center;gap:0;}
+.funnel-col.right{align-items:center;}
+.funnel-labels-col{display:flex;flex-direction:column;justify-content:center;gap:0;}
+.funnel-col-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.funnel-col-title.ia{color:var(--ia);}
+.funnel-col-title.op{color:var(--op);}
+.funnel-center-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+.f-stage{width:100%;display:flex;align-items:center;margin-bottom:4px;}
+.f-stage.right{flex-direction:row-reverse;}
+.f-bar-wrap{flex:1;position:relative;}
+.f-bar{height:52px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:width .4s ease;}
+.f-bar.ia{background:linear-gradient(90deg,#0a3a5c,#006fa6);border:1px solid #0099cc;}
+.f-bar.op{background:linear-gradient(90deg,#0a4a3a,#00836a);border:1px solid #00b894;}
+.f-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#fff;}
+.f-pct-left{font-size:11px;color:var(--muted);width:48px;text-align:right;padding-right:8px;}
+.f-pct-right{font-size:11px;color:var(--muted);width:48px;text-align:left;padding-left:8px;}
+.f-label-center{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--text);text-align:center;height:56px;display:flex;align-items:center;justify-content:center;border-top:1px dashed var(--border);width:100%;}
+.f-label-center:first-child{border-top:none;}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;}
+.chart-card-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.chart-container{position:relative;height:230px;}
+
+/* DETAIL TABLE */
+.detail-table-wrap{overflow-x:auto;}
+.detail-table{width:100%;border-collapse:collapse;font-size:12px;}
+.detail-table th{background:var(--surface2);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
+.detail-table th:first-child,.detail-table th:nth-child(2),.detail-table th:nth-child(3){text-align:left;}
+.detail-table td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;color:var(--text);white-space:nowrap;}
+.detail-table td:first-child,.detail-table td:nth-child(2),.detail-table td:nth-child(3){text-align:left;color:var(--muted);font-size:11px;}
+.detail-table tr:hover td{background:var(--surface2);}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;}
+.badge-ia{background:#0a2a3a;color:var(--ia);}
+.badge-op{background:#0a2a1a;color:var(--op);}
+.pct-high{background:#1a3a2a;color:#5dde8a;}
+.pct-mid{background:#2a2a1a;color:#d29922;}
+.pct-low{background:#3a1a1a;color:#f85149;}
+
+/* ANALYSIS */
+.analysis-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
+.analysis-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.analysis-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.analysis-btn{background:linear-gradient(135deg,#1a4f9c,#2e7de9);border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:opacity .2s;}
+.analysis-btn:hover{opacity:.85;}
+.analysis-btn:disabled{opacity:.5;cursor:not-allowed;}
+.analysis-body{min-height:80px;color:var(--text);font-size:13px;line-height:1.7;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img class="header-logo" src="data:image/png;base64,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" alt="DNR">
+    <div class="header-divider"></div>
+    <div>
+      <div class="header-title">IA vs Operação</div>
+      <div class="header-sub">Dashboard Comparativo · Funil de Cobrança · Atualização via Upload</div>
+    </div>
+  </div>
+  <div class="upload-area">
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">↑ Atualizar Dados</button>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleUpload(event)">
+    <span class="upload-label" id="uploadLabel">Carregar novo .xlsx</span>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="filter-group">
+    <span class="filter-label">Empresa</span>
+    <select class="filter-select" id="filterEmpresa" onchange="render()"><option value="ALL">Todas</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Carteira</span>
+    <select class="filter-select" id="filterCarteira" onchange="render()"><option value="ALL">Todas</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Canal</span>
+    <select class="filter-select" id="filterCanal" onchange="render()"><option value="ALL">Todos</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Data Início</span>
+    <input type="date" class="filter-select" id="filterDateIni" onchange="render()" style="min-width:130px;">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Data Fim</span>
+    <input type="date" class="filter-select" id="filterDateFim" onchange="render()" style="min-width:130px;">
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI -->
+  <div>
+    <div class="section-title">Indicadores Principais</div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </div>
+
+  <!-- DUAL FUNNEL -->
+  <div>
+    <div class="section-title">Funil Comparativo — IA vs Operação</div>
+    <div class="dual-funnel-wrapper">
+      <div class="dual-funnel-grid">
+        <div>
+          <div class="funnel-col-title ia">IA</div>
+          <div id="funnelIA"></div>
+        </div>
+        <div>
+          <div class="funnel-center-title">Etapa</div>
+          <div id="funnelLabels"></div>
+        </div>
+        <div>
+          <div class="funnel-col-title op">Operação</div>
+          <div id="funnelOP"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div>
+    <div class="section-title">Gráficos Comparativos</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">Acordos por Dia — IA vs Operação</div>
+        <div class="chart-container"><canvas id="chartAcordoDia"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Taxa de Conversão CPC→Acordo (%)</div>
+        <div class="chart-container"><canvas id="chartConvDia"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Valor de Acordo por Canal</div>
+        <div class="chart-container"><canvas id="chartValor"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Acordos por Empresa</div>
+        <div class="chart-container"><canvas id="chartEmpresa"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div>
+    <div class="analysis-card">
+      <div class="analysis-header">
+        <div class="analysis-title">✦ Comentários de Análise</div>
+        <button class="analysis-btn" id="analysisBtn" onclick="generateAnalysis()">✦ Gerar Análise</button>
+      </div>
+      <div class="analysis-body" id="analysisBody">Clique em <strong>Gerar Análise</strong> para obter insights automáticos sobre a performance IA vs Operação.</div>
+    </div>
+  </div>
+
+  <!-- DETAIL TABLE -->
+  <div>
+    <div class="section-title">Detalhe por Carteira e Canal</div>
+    <div class="chart-card detail-table-wrap">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>Empresa</th><th>Carteira</th><th>Canal</th>
+            <th>Acionamento</th><th>ALO</th><th>CPC</th><th>Acordo</th>
+            <th>Conv. CPC%</th><th>Valor Acordo</th><th>Pgtos</th><th>Valor Pgto</th>
+          </tr>
+        </thead>
+        <tbody id="detailTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+// Mapeamento de nomes alternativos de colunas (Excel pode vir em minúsculo)
+const COL_MAP = {
+  'data_ref':'DATA_REF','carteira':'CARTEIRA','empresa':'EMPRESA',
+  'acio':'ACIO','alo':'ALO','cpc':'CPC','canal':'CANAL',
+  'acordo':'ACORDO','valor':'VALOR','pagamentos':'PAGAMENTOS','valor_pgto':'VALOR_PGTO'
+};
+const HEADERS = ["DATA_REF","CARTEIRA","EMPRESA","ACIO","ALO","CPC","CANAL","ACORDO","VALOR","PAGAMENTOS","VALOR_PGTO"];
+const EMBEDDED = [["2026-03-04", "SANTANDER", "SANTANDER", 487, 487, 70, "I.A", 3, 13984.51, 0, 0], ["2026-03-04", "SANTANDER", "SANTANDER", 1296, 1296, 263, "OPERACAO", 126, 724715.23, 0, 0], ["2026-03-04", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 1468, 1468, 92, "I.A", 13, 22887.3, 4, 2664.15], ["2026-03-04", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 1710, 1710, 58, "I.A", 1, 20011.54, 0, 0], ["2026-03-04", "0162-Banco Original - PP BANK", "Banco Original", 4, 4, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0191-Pravaler Cyber", "Pravaler", 745, 745, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0266-Kroton PEP Presencial(RAID)", "Kroton", 1287, 1287, 39, "I.A", 3, 3564.8, 0, 0], ["2026-03-04", "0267-Kroton PEP EAD (RAID)", "Kroton", 8, 8, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0268-Anhanguera Campus (RAID)", "Kroton", 111, 111, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0269-Anhanguera EAD (RAID)", "Kroton", 349, 349, 8, "I.A", 2, 623.98, 2, 623.98], ["2026-03-04", "0270-Unopar EAD - (RAID)", "Kroton", 352, 352, 10, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0271-DM Presencial (RAID)", "Kroton", 34, 34, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0272-DM EAD (RAID)", "Kroton", 6, 6, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 6, 6, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0660-Via Varejo Prejuízo", "Via Varejo", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 838, 838, 31, "I.A", 4, 1172.04, 1, 216.01], ["2026-03-04", "1152-CDC Amigável", "Porto Seguro", 392, 392, 55, "I.A", 12, 16886.91, 4, 4153.67], ["2026-03-04", "1153-Porto Seguro Cartão", "Porto Seguro", 1456, 1456, 29, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "1250-Movida", "Movida", 508, 508, 13, "I.A", 1, 373.77, 0, 0], ["2026-03-04", "1251-Movida Sem Garantia - ZERO KM", "Movida", 2, 2, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "1252-Movida - PJ", "Movida", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "1253-Movida - PJ S/ Veículos", "Movida", 3, 3, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-04", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 4041, 3633, 1705, "OPERACAO", 1270, 3008985.06, 779, 1859495.73], ["2026-03-04", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 676, 587, 111, "OPERACAO", 30, 266732.87, 19, 139467.94], ["2026-03-04", "0161-Banco Original", "Banco Original", 3, 2, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0162-Banco Original - PP BANK", "Banco Original", 5407, 3930, 669, "OPERACAO", 287, 25256.36, 256, 3041.03], ["2026-03-04", "0191-Pravaler Cyber", "Pravaler", 675, 353, 39, "OPERACAO", 18, 24804.91, 0, 0], ["2026-03-04", "0192-Pravaler Cyber Obsoleto", "Pravaler", 102, 34, 2, "OPERACAO", 2, 7636.52, 0, 0], ["2026-03-04", "0266-Kroton PEP Presencial(RAID)", "Kroton", 879, 345, 212, "OPERACAO", 11, 21902.09, 3, 13319.39], ["2026-03-04", "0267-Kroton PEP EAD (RAID)", "Kroton", 10, 4, 2, "OPERACAO", 1, 1510.66, 0, 0], ["2026-03-04", "0268-Anhanguera Campus (RAID)", "Kroton", 229, 96, 45, "OPERACAO", 3, 5699.51, 1, 3599.93], ["2026-03-04", "0269-Anhanguera EAD (RAID)", "Kroton", 1263, 583, 374, "OPERACAO", 27, 10752.22, 6, 2210.08], ["2026-03-04", "0270-Unopar EAD - (RAID)", "Kroton", 963, 408, 248, "OPERACAO", 14, 3870.66, 1, 199.85], ["2026-03-04", "0271-DM Presencial (RAID)", "Kroton", 64, 29, 12, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0272-DM EAD (RAID)", "Kroton", 14, 8, 5, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 25, 18, 8, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0660-Via Varejo Prejuízo", "Via Varejo", 11, 3, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0661-Via Varejo Ativa", "Via Varejo", 4, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0663-Via Varejo PA Fixa", "Via Varejo", 2, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 8930, 3592, 435, "OPERACAO", 180, 246729.63, 30, 13066.81], ["2026-03-04", "1150-Porto Seguro CDC", "Porto Seguro", 1598, 1054, 746, "OPERACAO", 46, 214007.25, 31, 87131.04], ["2026-03-04", "1152-CDC Amigável", "Porto Seguro", 1878, 1223, 800, "OPERACAO", 171, 533544.91, 112, 231732.14], ["2026-03-04", "1153-Porto Seguro Cartão", "Porto Seguro", 2787, 2470, 1152, "OPERACAO", 84, 104689.83, 19, 12077.24], ["2026-03-04", "1250-Movida", "Movida", 785, 641, 69, "OPERACAO", 26, 5905.73, 7, 1500.53], ["2026-03-04", "1251-Movida Sem Garantia - ZERO KM", "Movida", 229, 185, 19, "OPERACAO", 8, 31373.26, 2, 4806.51], ["2026-03-04", "1252-Movida - PJ", "Movida", 102, 48, 42, "OPERACAO", 32, 85290.83, 18, 49450.71], ["2026-03-04", "1253-Movida - PJ S/ Veículos", "Movida", 56, 31, 29, "OPERACAO", 21, 57204.11, 13, 18028.09], ["2026-03-04", "1255-Movida - Participações", "Movida", 3, 2, 2, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "1256-Movida Memo", "Movida", 1, 1, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-04", "1257- Movida - ZERO KM Com Veiculos", "Movida", 188, 116, 88, "OPERACAO", 27, 76793.08, 4, 7750.59], ["2026-03-05", "C6 BANK", "C6 BANK", 2142, 2142, 405, "I.A", 57, 103284.47, 0, 0], ["2026-03-05", "C6 BANK", "C6 BANK", 3659, 2858, 1301, "OPERACAO", 385, 1862263.43, 0, 0], ["2026-03-05", "SANTANDER", "SANTANDER", 583, 583, 85, "I.A", 4, 5813.28, 0, 0], ["2026-03-05", "SANTANDER", "SANTANDER", 1530, 1530, 273, "OPERACAO", 128, 1154326.1, 0, 0], ["2026-03-05", "0267-Kroton PEP EAD (RAID)", "Kroton", 43, 6, 5, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0268-Anhanguera Campus (RAID)", "Kroton", 205, 95, 60, "OPERACAO", 2, 967.17, 0, 0], ["2026-03-05", "0269-Anhanguera EAD (RAID)", "Kroton", 576, 268, 200, "OPERACAO", 19, 7710.08, 6, 2826.69], ["2026-03-05", "0270-Unopar EAD - (RAID)", "Kroton", 512, 210, 149, "OPERACAO", 12, 6312.59, 2, 779.57], ["2026-03-05", "0271-DM Presencial (RAID)", "Kroton", 56, 23, 15, "OPERACAO", 3, 1460.91, 0, 0], ["2026-03-05", "0272-DM EAD (RAID)", "Kroton", 11, 5, 3, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0274-Kroton ATP", "Kroton", 1, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 34, 16, 6, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0660-Via Varejo Prejuízo", "Via Varejo", 3, 2, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0663-Via Varejo PA Fixa", "Via Varejo", 1, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 8827, 3403, 415, "OPERACAO", 157, 195839.96, 15, 5636.13], ["2026-03-05", "1150-Porto Seguro CDC", "Porto Seguro", 1487, 894, 625, "OPERACAO", 41, 272896.67, 26, 123275.63], ["2026-03-05", "1152-CDC Amigável", "Porto Seguro", 1875, 1126, 813, "OPERACAO", 285, 692908.0, 116, 267889.63], ["2026-03-05", "1153-Porto Seguro Cartão", "Porto Seguro", 2550, 2182, 987, "OPERACAO", 104, 239615.86, 12, 12501.64], ["2026-03-05", "1250-Movida", "Movida", 655, 538, 62, "OPERACAO", 29, 13432.83, 16, 3459.67], ["2026-03-05", "1251-Movida Sem Garantia - ZERO KM", "Movida", 157, 112, 14, "OPERACAO", 6, 17141.14, 2, 2953.39], ["2026-03-05", "1252-Movida - PJ", "Movida", 66, 48, 27, "OPERACAO", 9, 14924.14, 3, 1521.36], ["2026-03-05", "1253-Movida - PJ S/ Veículos", "Movida", 49, 34, 11, "OPERACAO", 8, 27138.28, 3, 15544.18], ["2026-03-05", "1255-Movida - Participações", "Movida", 8, 5, 5, "OPERACAO", 4, 3603.66, 0, 0], ["2026-03-05", "1256-Movida Memo", "Movida", 0, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "1257- Movida - ZERO KM Com Veiculos", "Movida", 183, 133, 105, "OPERACAO", 28, 80898.27, 4, 10178.32], ["2026-03-06", "C6 BANK", "C6 BANK", 2079, 2079, 388, "I.A", 57, 96572.6, 0, 0], ["2026-03-06", "C6 BANK", "C6 BANK", 3104, 2371, 1305, "OPERACAO", 356, 780164.48, 0, 0], ["2026-03-06", "SANTANDER", "SANTANDER", 798, 798, 142, "I.A", 9, 24078.8, 0, 0], ["2026-03-06", "SANTANDER", "SANTANDER", 1290, 1290, 336, "OPERACAO", 139, 16756146.41, 0, 0], ["2026-03-07", "C6 BANK", "C6 BANK", 1669, 1669, 370, "I.A", 51, 82065.91, 0, 0], ["2026-03-07", "C6 BANK", "C6 BANK", 2382, 2032, 990, "OPERACAO", 328, 590985.4, 0, 0], ["2026-03-07", "SANTANDER", "SANTANDER", 305, 305, 59, "I.A", 3, 5552.64, 0, 0], ["2026-03-07", "SANTANDER", "SANTANDER", 427, 427, 43, "OPERACAO", 15, 32391.35, 0, 0], ["2026-03-07", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 859, 859, 67, "I.A", 4, 9395.95, 1, 4662.63], ["2026-03-07", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 1250, 1250, 50, "I.A", 1, 13411.91, 0, 0], ["2026-03-07", "0161-Banco Original", "Banco Original", 2, 2, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0162-Banco Original - PP BANK", "Banco Original", 2, 2, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0191-Pravaler Cyber", "Pravaler", 161, 161, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0268-Anhanguera Campus (RAID)", "Kroton", 278, 278, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0269-Anhanguera EAD (RAID)", "Kroton", 2046, 2046, 100, "I.A", 7, 2591.08, 1, 402.09], ["2026-03-07", "0270-Unopar EAD - (RAID)", "Kroton", 397, 397, 21, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0271-DM Presencial (RAID)", "Kroton", 65, 65, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0272-DM EAD (RAID)", "Kroton", 18, 18, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 411, 411, 20, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "1152-CDC Amigável", "Porto Seguro", 366, 366, 19, "I.A", 3, 4927.53, 0, 0], ["2026-03-07", "1153-Porto Seguro Cartão", "Porto Seguro", 418, 418, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "1250-Movida", "Movida", 503, 503, 48, "I.A", 8, 1119.58, 2, 241.42], ["2026-03-07", "1251-Movida Sem Garantia - ZERO KM", "Movida", 90, 90, 8, "I.A", 2, 8091.83, 0, 0], ["2026-03-07", "1252-Movida - PJ", "Movida", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "1253-Movida - PJ S/ Veículos", "Movida", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "1257- Movida - ZERO KM Com Veiculos", "Movida", 8, 8, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-07", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 3206, 3049, 2014, "OPERACAO", 443, 893630.8, 180, 185648.55], ["2026-03-07", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 1101, 946, 52, "OPERACAO", 4, 40410.78, 0, 0], ["2026-03-07", "0161-Banco Original", "Banco Original", 5, 2, 1, "OPERACAO", 1, 729.83, 0, 0], ["2026-03-07", "0162-Banco Original - PP BANK", "Banco Original", 3063, 2312, 300, "OPERACAO", 134, 2695.37, 122, 60.5], ["2026-03-07", "0191-Pravaler Cyber", "Pravaler", 334, 130, 7, "OPERACAO", 2, 10671.52, 0, 0], ["2026-03-07", "0192-Pravaler Cyber Obsoleto", "Pravaler", 2, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0266-Kroton PEP Presencial(RAID)", "Kroton", 874, 394, 245, "OPERACAO", 1, 968.05, 0, 0], ["2026-03-07", "0267-Kroton PEP EAD (RAID)", "Kroton", 2, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0268-Anhanguera Campus (RAID)", "Kroton", 66, 26, 16, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0269-Anhanguera EAD (RAID)", "Kroton", 150, 77, 58, "OPERACAO", 4, 2017.08, 0, 0], ["2026-03-07", "0270-Unopar EAD - (RAID)", "Kroton", 131, 58, 37, "OPERACAO", 6, 2614.73, 0, 0], ["2026-03-07", "0271-DM Presencial (RAID)", "Kroton", 23, 11, 5, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0272-DM EAD (RAID)", "Kroton", 3, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 2, 1, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-07", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 4993, 1963, 220, "OPERACAO", 100, 134672.25, 1, 120.74], ["2026-03-07", "1150-Porto Seguro CDC", "Porto Seguro", 371, 182, 174, "OPERACAO", 11, 33767.93, 5, 16495.31], ["2026-03-07", "1152-CDC Amigável", "Porto Seguro", 908, 618, 385, "OPERACAO", 108, 342916.55, 31, 90760.62], ["2026-03-07", "1153-Porto Seguro Cartão", "Porto Seguro", 1365, 1151, 531, "OPERACAO", 26, 61515.48, 1, 747.66], ["2026-03-07", "1250-Movida", "Movida", 457, 383, 27, "OPERACAO", 15, 2921.28, 5, 1142.71], ["2026-03-07", "1251-Movida Sem Garantia - ZERO KM", "Movida", 18, 3, 3, "OPERACAO", 3, 5285.55, 0, 0], ["2026-03-07", "1257- Movida - ZERO KM Com Veiculos", "Movida", 22, 8, 8, "OPERACAO", 7, 18448.78, 1, 2647.33], ["2026-03-06", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 1447, 1447, 78, "I.A", 7, 6474.2, 3, 3846.85], ["2026-03-06", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 2454, 2454, 120, "I.A", 4, 29456.75, 0, 0], ["2026-03-06", "0161-Banco Original", "Banco Original", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0162-Banco Original - PP BANK", "Banco Original", 11, 11, 6, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0191-Pravaler Cyber", "Pravaler", 503, 503, 8, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0268-Anhanguera Campus (RAID)", "Kroton", 91, 91, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0269-Anhanguera EAD (RAID)", "Kroton", 2661, 2661, 185, "I.A", 18, 3930.06, 6, 1900.29], ["2026-03-06", "0270-Unopar EAD - (RAID)", "Kroton", 696, 693, 47, "I.A", 6, 2084.1, 3, 858.63], ["2026-03-06", "0271-DM Presencial (RAID)", "Kroton", 31, 31, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0272-DM EAD (RAID)", "Kroton", 45, 45, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0660-Via Varejo Prejuízo", "Via Varejo", 3, 3, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 637, 637, 31, "I.A", 1, 83.19, 0, 0], ["2026-03-06", "1150-Porto Seguro CDC", "Porto Seguro", 1, 1, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "1152-CDC Amigável", "Porto Seguro", 447, 447, 41, "I.A", 3, 6070.59, 1, 1276.38], ["2026-03-06", "1153-Porto Seguro Cartão", "Porto Seguro", 560, 560, 32, "I.A", 1, 5245.57, 0, 0], ["2026-03-06", "1250-Movida", "Movida", 424, 424, 39, "I.A", 4, 1040.41, 2, 206.57], ["2026-03-06", "1251-Movida Sem Garantia - ZERO KM", "Movida", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "1253-Movida - PJ S/ Veículos", "Movida", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-06", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 3548, 3172, 1431, "OPERACAO", 1069, 2471587.48, 585, 1149260.1], ["2026-03-06", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 1271, 1055, 116, "OPERACAO", 29, 138127.6, 13, 39321.86], ["2026-03-06", "0161-Banco Original", "Banco Original", 15, 12, 1, "OPERACAO", 1, 150.0, 0, 0], ["2026-03-06", "0162-Banco Original - PP BANK", "Banco Original", 5915, 4316, 565, "OPERACAO", 218, 10967.75, 187, 727.26], ["2026-03-06", "0191-Pravaler Cyber", "Pravaler", 1045, 435, 57, "OPERACAO", 20, 31759.66, 0, 0], ["2026-03-06", "0192-Pravaler Cyber Obsoleto", "Pravaler", 190, 50, 5, "OPERACAO", 8, 27602.76, 0, 0], ["2026-03-06", "0265- Kroton PEP", "Kroton", 1, 1, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0266-Kroton PEP Presencial(RAID)", "Kroton", 1308, 640, 353, "OPERACAO", 16, 43397.8, 1, 6079.23], ["2026-03-06", "0267-Kroton PEP EAD (RAID)", "Kroton", 5, 2, 2, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0268-Anhanguera Campus (RAID)", "Kroton", 251, 128, 67, "OPERACAO", 6, 5661.48, 0, 0], ["2026-03-06", "0269-Anhanguera EAD (RAID)", "Kroton", 393, 186, 132, "OPERACAO", 12, 5111.67, 3, 587.91], ["2026-03-06", "0270-Unopar EAD - (RAID)", "Kroton", 393, 185, 108, "OPERACAO", 8, 2959.84, 0, 0], ["2026-03-06", "0271-DM Presencial (RAID)", "Kroton", 79, 42, 14, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0272-DM EAD (RAID)", "Kroton", 4, 3, 2, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 15, 7, 5, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0660-Via Varejo Prejuízo", "Via Varejo", 12, 4, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0663-Via Varejo PA Fixa", "Via Varejo", 2, 2, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 9185, 3793, 441, "OPERACAO", 169, 260617.51, 15, 4825.41], ["2026-03-06", "1150-Porto Seguro CDC", "Porto Seguro", 1402, 872, 622, "OPERACAO", 28, 146802.3, 19, 113189.87], ["2026-03-06", "1152-CDC Amigável", "Porto Seguro", 1491, 922, 638, "OPERACAO", 163, 578253.82, 47, 154470.99], ["2026-03-06", "1153-Porto Seguro Cartão", "Porto Seguro", 2469, 2144, 819, "OPERACAO", 74, 246558.84, 7, 42454.17], ["2026-03-06", "1250-Movida", "Movida", 639, 520, 73, "OPERACAO", 28, 9454.09, 9, 1252.05], ["2026-03-06", "1251-Movida Sem Garantia - ZERO KM", "Movida", 144, 112, 24, "OPERACAO", 6, 12625.73, 1, 2452.36], ["2026-03-06", "1252-Movida - PJ", "Movida", 76, 45, 29, "OPERACAO", 19, 102531.62, 0, 0], ["2026-03-06", "1253-Movida - PJ S/ Veículos", "Movida", 37, 22, 8, "OPERACAO", 3, 489.32, 0, 0], ["2026-03-06", "1255-Movida - Participações", "Movida", 3, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-06", "1256-Movida Memo", "Movida", 5, 4, 4, "OPERACAO", 2, 991.58, 1, 836.42], ["2026-03-06", "1257- Movida - ZERO KM Com Veiculos", "Movida", 267, 191, 95, "OPERACAO", 34, 134653.86, 8, 21196.23], ["2026-03-08", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 1, 1, 1, "OPERACAO", 1, 354.2, 1, 354.2], ["2026-03-08", "1152-CDC Amigável", "Porto Seguro", 1, 1, 1, "OPERACAO", 1, 1971.42, 0, 0], ["2026-03-08", "1153-Porto Seguro Cartão", "Porto Seguro", 0, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-08", "1250-Movida", "Movida", 1, 1, 1, "OPERACAO", 1, 431.37, 1, 431.37], ["2026-03-09", "C6 BANK", "C6 BANK", 2099, 2099, 515, "I.A", 73, 123450.25, 0, 0], ["2026-03-09", "C6 BANK", "C6 BANK", 2957, 2432, 1309, "OPERACAO", 411, 827520.16, 0, 0], ["2026-03-09", "SANTANDER", "SANTANDER", 453, 453, 75, "I.A", 3, 13635.66, 0, 0], ["2026-03-09", "SANTANDER", "SANTANDER", 1891, 1891, 321, "OPERACAO", 120, 638361.95, 0, 0], ["2026-03-09", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 1545, 1545, 97, "I.A", 12, 17908.25, 1, 4668.65], ["2026-03-09", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 1928, 1928, 127, "I.A", 7, 55685.12, 0, 0], ["2026-03-09", "0161-Banco Original", "Banco Original", 1, 1, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0162-Banco Original - PP BANK", "Banco Original", 8, 8, 7, "I.A", 1, 0.0, 1, 0.0], ["2026-03-09", "0191-Pravaler Cyber", "Pravaler", 222, 222, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0266-Kroton PEP Presencial(RAID)", "Kroton", 7, 4, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0268-Anhanguera Campus (RAID)", "Kroton", 431, 431, 10, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0269-Anhanguera EAD (RAID)", "Kroton", 1931, 1928, 132, "I.A", 10, 5408.86, 3, 1071.61], ["2026-03-09", "0270-Unopar EAD - (RAID)", "Kroton", 400, 400, 28, "I.A", 1, 302.28, 0, 0], ["2026-03-09", "0271-DM Presencial (RAID)", "Kroton", 138, 138, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0272-DM EAD (RAID)", "Kroton", 28, 28, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0660-Via Varejo Prejuízo", "Via Varejo", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 631, 631, 67, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "1152-CDC Amigável", "Porto Seguro", 658, 658, 64, "I.A", 9, 11649.76, 2, 3898.32], ["2026-03-09", "1153-Porto Seguro Cartão", "Porto Seguro", 503, 503, 29, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "1250-Movida", "Movida", 237, 237, 24, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "1251-Movida Sem Garantia - ZERO KM", "Movida", 389, 389, 33, "I.A", 2, 5972.24, 0, 0], ["2026-03-09", "1257- Movida - ZERO KM Com Veiculos", "Movida", 45, 45, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-09", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 4530, 4071, 1693, "OPERACAO", 1287, 3038852.18, 523, 907564.37], ["2026-03-09", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 2346, 1982, 213, "OPERACAO", 43, 231063.1, 11, 54415.43], ["2026-03-09", "0161-Banco Original", "Banco Original", 4, 2, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0162-Banco Original - PP BANK", "Banco Original", 5921, 4367, 701, "OPERACAO", 284, 9893.29, 271, 952.63], ["2026-03-09", "0191-Pravaler Cyber", "Pravaler", 1192, 565, 65, "OPERACAO", 21, 36796.96, 0, 0], ["2026-03-09", "0192-Pravaler Cyber Obsoleto", "Pravaler", 78, 50, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0265- Kroton PEP", "Kroton", 1, 1, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0266-Kroton PEP Presencial(RAID)", "Kroton", 2012, 885, 577, "OPERACAO", 16, 36231.32, 1, 1840.09], ["2026-03-09", "0267-Kroton PEP EAD (RAID)", "Kroton", 5, 2, 2, "OPERACAO", 1, 999.84, 0, 0], ["2026-03-09", "0268-Anhanguera Campus (RAID)", "Kroton", 202, 80, 61, "OPERACAO", 4, 22530.83, 0, 0], ["2026-03-09", "0269-Anhanguera EAD (RAID)", "Kroton", 333, 134, 113, "OPERACAO", 3, 1970.33, 1, 618.48], ["2026-03-09", "0270-Unopar EAD - (RAID)", "Kroton", 322, 133, 108, "OPERACAO", 9, 2368.7, 1, 255.44], ["2026-03-09", "0271-DM Presencial (RAID)", "Kroton", 50, 12, 7, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0272-DM EAD (RAID)", "Kroton", 4, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 12, 5, 2, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0660-Via Varejo Prejuízo", "Via Varejo", 11, 5, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0663-Via Varejo PA Fixa", "Via Varejo", 7, 1, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 7807, 3777, 399, "OPERACAO", 188, 281249.39, 0, 0], ["2026-03-09", "1150-Porto Seguro CDC", "Porto Seguro", 1523, 956, 708, "OPERACAO", 30, 183862.26, 10, 65859.68], ["2026-03-09", "1152-CDC Amigável", "Porto Seguro", 1936, 1456, 915, "OPERACAO", 192, 535498.6, 26, 42167.67], ["2026-03-09", "1153-Porto Seguro Cartão", "Porto Seguro", 2835, 2637, 765, "OPERACAO", 145, 170940.34, 3, 2270.03], ["2026-03-09", "1250-Movida", "Movida", 732, 621, 63, "OPERACAO", 27, 9511.41, 8, 1909.99], ["2026-03-09", "1251-Movida Sem Garantia - ZERO KM", "Movida", 130, 104, 20, "OPERACAO", 4, 8196.68, 0, 0], ["2026-03-09", "1252-Movida - PJ", "Movida", 61, 43, 35, "OPERACAO", 21, 63100.22, 3, 6726.88], ["2026-03-09", "1253-Movida - PJ S/ Veículos", "Movida", 54, 40, 25, "OPERACAO", 17, 62915.96, 4, 9150.17], ["2026-03-09", "1255-Movida - Participações", "Movida", 4, 2, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "1256-Movida Memo", "Movida", 4, 4, 4, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-09", "1257- Movida - ZERO KM Com Veiculos", "Movida", 274, 213, 89, "OPERACAO", 33, 96902.0, 4, 11006.73], ["2026-03-02", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 3949, 3949, 309, "I.A", 47, 54858.73, 20, 20941.71], ["2026-03-02", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 2653, 2653, 101, "I.A", 3, 1453.53, 0, 0], ["2026-03-02", "0162-Banco Original - PP BANK", "Banco Original", 8, 8, 8, "I.A", 1, 0.0, 1, 0.0], ["2026-03-02", "0191-Pravaler Cyber", "Pravaler", 757, 757, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0266-Kroton PEP Presencial(RAID)", "Kroton", 1688, 1688, 49, "I.A", 4, 890.3, 3, 598.96], ["2026-03-02", "0267-Kroton PEP EAD (RAID)", "Kroton", 10, 10, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0268-Anhanguera Campus (RAID)", "Kroton", 186, 186, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0269-Anhanguera EAD (RAID)", "Kroton", 1104, 1104, 36, "I.A", 3, 430.86, 0, 0], ["2026-03-02", "0270-Unopar EAD - (RAID)", "Kroton", 729, 729, 23, "I.A", 5, 921.08, 2, 406.92], ["2026-03-02", "0271-DM Presencial (RAID)", "Kroton", 46, 46, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0272-DM EAD (RAID)", "Kroton", 15, 15, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 2, 2, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 761, 761, 51, "I.A", 2, 155.17, 1, 71.4], ["2026-03-02", "1152-CDC Amigável", "Porto Seguro", 1221, 1221, 102, "I.A", 14, 15698.06, 6, 7239.2], ["2026-03-02", "1153-Porto Seguro Cartão", "Porto Seguro", 1305, 1305, 33, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "1250-Movida", "Movida", 833, 833, 65, "I.A", 9, 3612.51, 2, 878.71], ["2026-03-02", "1251-Movida Sem Garantia - ZERO KM", "Movida", 8, 8, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "1252-Movida - PJ", "Movida", 3, 3, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "1253-Movida - PJ S/ Veículos", "Movida", 41, 41, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-02", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 4636, 4149, 1873, "OPERACAO", 1413, 3066610.16, 857, 1855096.93], ["2026-03-02", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 970, 825, 150, "OPERACAO", 40, 160108.85, 20, 96150.11], ["2026-03-02", "0161-Banco Original", "Banco Original", 8, 6, 1, "OPERACAO", 1, 155.0, 0, 0], ["2026-03-02", "0162-Banco Original - PP BANK", "Banco Original", 6142, 4657, 695, "OPERACAO", 214, 9797.31, 182, 478.28], ["2026-03-02", "0191-Pravaler Cyber", "Pravaler", 621, 281, 47, "OPERACAO", 18, 30954.34, 0, 0], ["2026-03-02", "0192-Pravaler Cyber Obsoleto", "Pravaler", 123, 58, 6, "OPERACAO", 6, 16144.21, 0, 0], ["2026-03-02", "0266-Kroton PEP Presencial(RAID)", "Kroton", 691, 336, 208, "OPERACAO", 12, 45922.41, 3, 1862.63], ["2026-03-02", "0267-Kroton PEP EAD (RAID)", "Kroton", 2, 1, 1, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-02", "0268-Anhanguera Campus (RAID)", "Kroton", 206, 91, 64, "OPERACAO", 2, 1339.9, 0, 0], ["2026-03-02", "0269-Anhanguera EAD (RAID)", "Kroton", 937, 478, 340, "OPERACAO", 26, 7706.8, 8, 1648.73], ["2026-03-02", "0270-Unopar EAD - (RAID)", "Kroton", 934, 437, 287, "OPERACAO", 23, 9207.1, 3, 1622.26], ["2026-03-02", "0271-DM Presencial (RAID)", "Kroton", 60, 27, 16, "OPERACAO", 2, 2488.43, 0, 0], ["2026-03-02", "0272-DM EAD (RAID)", "Kroton", 11, 6, 2, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-02", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 18, 12, 6, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-02", "0452-Movida Piloto", "Movida", 1, 1, 1, "OPERACAO", 1, 131.19, 0, 0], ["2026-03-02", "0660-Via Varejo Prejuízo", "Via Varejo", 10, 4, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-02", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 8373, 4016, 509, "OPERACAO", 213, 189573.51, 28, 18616.43], ["2026-03-02", "1150-Porto Seguro CDC", "Porto Seguro", 1422, 869, 709, "OPERACAO", 33, 210677.51, 18, 99038.57], ["2026-03-02", "1152-CDC Amigável", "Porto Seguro", 2002, 1335, 938, "OPERACAO", 228, 915795.76, 132, 417034.34], ["2026-03-02", "1153-Porto Seguro Cartão", "Porto Seguro", 2447, 2119, 995, "OPERACAO", 144, 110945.82, 20, 12369.33], ["2026-03-02", "1250-Movida", "Movida", 774, 652, 82, "OPERACAO", 35, 26678.82, 16, 4727.56], ["2026-03-02", "1251-Movida Sem Garantia - ZERO KM", "Movida", 74, 62, 27, "OPERACAO", 14, 52652.67, 2, 2650.49], ["2026-03-02", "1252-Movida - PJ", "Movida", 110, 76, 48, "OPERACAO", 31, 59315.2, 18, 44883.68], ["2026-03-02", "1253-Movida - PJ S/ Veículos", "Movida", 42, 26, 20, "OPERACAO", 14, 5320.11, 2, 942.46], ["2026-03-02", "1255-Movida - Participações", "Movida", 11, 5, 5, "OPERACAO", 5, 24036.78, 2, 4651.54], ["2026-03-02", "1256-Movida Memo", "Movida", 0, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-02", "1257- Movida - ZERO KM Com Veiculos", "Movida", 235, 185, 146, "OPERACAO", 61, 207256.52, 21, 51274.59], ["2026-03-02", "C6 BANK", "C6 BANK", 2787, 2787, 599, "I.A", 116, 201420.76, 0, 0], ["2026-03-02", "C6 BANK", "C6 BANK", 3709, 2890, 1383, "OPERACAO", 451, 835112.52, 0, 0], ["2026-03-02", "SANTANDER", "SANTANDER", 1231, 1231, 169, "I.A", 4, 7568.05, 0, 0], ["2026-03-02", "SANTANDER", "SANTANDER", 1055, 1055, 291, "OPERACAO", 166, 809578.9, 0, 0], ["2026-03-03", "C6 BANK", "C6 BANK", 4378, 3655, 1843, "OPERACAO", 621, 1354448.45, 0, 0], ["2026-03-03", "C6 BANK", "C6 BANK", 2764, 2764, 594, "I.A", 94, 183869.32, 0, 0], ["2026-03-03", "SANTANDER", "SANTANDER", 1385, 1385, 289, "OPERACAO", 110, 356542.63, 0, 0], ["2026-03-03", "SANTANDER", "SANTANDER", 852, 852, 143, "I.A", 8, 31782.64, 0, 0], ["2026-03-03", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 2868, 2868, 211, "I.A", 37, 64487.64, 13, 20140.19], ["2026-03-03", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 2965, 2965, 98, "I.A", 3, 33527.18, 0, 0], ["2026-03-03", "0162-Banco Original - PP BANK", "Banco Original", 5, 5, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0191-Pravaler Cyber", "Pravaler", 521, 521, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0266-Kroton PEP Presencial(RAID)", "Kroton", 1345, 1345, 38, "I.A", 3, 1117.6, 1, 157.88], ["2026-03-03", "0267-Kroton PEP EAD (RAID)", "Kroton", 7, 7, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0268-Anhanguera Campus (RAID)", "Kroton", 189, 189, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0269-Anhanguera EAD (RAID)", "Kroton", 1475, 1475, 59, "I.A", 7, 1091.08, 2, 96.59], ["2026-03-03", "0270-Unopar EAD - (RAID)", "Kroton", 724, 724, 26, "I.A", 2, 826.63, 0, 0], ["2026-03-03", "0271-DM Presencial (RAID)", "Kroton", 49, 49, 4, "I.A", 2, 365.46, 1, 167.08], ["2026-03-03", "0272-DM EAD (RAID)", "Kroton", 20, 20, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 976, 976, 46, "I.A", 6, 1280.67, 1, 115.52], ["2026-03-03", "1152-CDC Amigável", "Porto Seguro", 983, 983, 78, "I.A", 13, 26576.46, 4, 7498.9], ["2026-03-03", "1153-Porto Seguro Cartão", "Porto Seguro", 1330, 1330, 39, "I.A", 4, 5382.78, 3, 4161.78], ["2026-03-03", "1250-Movida", "Movida", 876, 876, 32, "I.A", 3, 965.34, 0, 0], ["2026-03-03", "1251-Movida Sem Garantia - ZERO KM", "Movida", 7, 7, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "1253-Movida - PJ S/ Veículos", "Movida", 3, 3, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-03", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 3866, 3434, 1610, "OPERACAO", 1250, 3047315.48, 692, 1580734.95], ["2026-03-03", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 926, 814, 158, "OPERACAO", 46, 238808.84, 20, 143602.06], ["2026-03-03", "0161-Banco Original", "Banco Original", 6, 4, 3, "OPERACAO", 1, 40.0, 1, 40.0], ["2026-03-03", "0162-Banco Original - PP BANK", "Banco Original", 5507, 4176, 654, "OPERACAO", 254, 13020.23, 231, 282.67], ["2026-03-03", "0191-Pravaler Cyber", "Pravaler", 573, 312, 42, "OPERACAO", 14, 11637.9, 0, 0], ["2026-03-03", "0192-Pravaler Cyber Obsoleto", "Pravaler", 111, 58, 6, "OPERACAO", 6, 19537.56, 0, 0], ["2026-03-03", "0266-Kroton PEP Presencial(RAID)", "Kroton", 347, 136, 86, "OPERACAO", 12, 27469.52, 5, 10935.55], ["2026-03-03", "0267-Kroton PEP EAD (RAID)", "Kroton", 1, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0268-Anhanguera Campus (RAID)", "Kroton", 255, 119, 68, "OPERACAO", 6, 2436.97, 0, 0], ["2026-03-03", "0269-Anhanguera EAD (RAID)", "Kroton", 862, 428, 293, "OPERACAO", 25, 7043.7, 8, 2027.66], ["2026-03-03", "0270-Unopar EAD - (RAID)", "Kroton", 820, 375, 218, "OPERACAO", 16, 9672.61, 8, 3075.88], ["2026-03-03", "0271-DM Presencial (RAID)", "Kroton", 58, 23, 15, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0272-DM EAD (RAID)", "Kroton", 11, 7, 6, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0276-Kroton PEP Presencial > 1800 (RAID)", "Kroton", 10, 5, 3, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0660-Via Varejo Prejuízo", "Via Varejo", 11, 2, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0663-Via Varejo PA Fixa", "Via Varejo", 7, 0, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-03", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 9072, 4624, 604, "OPERACAO", 287, 296893.5, 31, 7040.21], ["2026-03-03", "1150-Porto Seguro CDC", "Porto Seguro", 1189, 679, 573, "OPERACAO", 35, 172880.26, 17, 61405.75], ["2026-03-03", "1152-CDC Amigável", "Porto Seguro", 1959, 1160, 785, "OPERACAO", 216, 628247.09, 117, 236015.59], ["2026-03-03", "1153-Porto Seguro Cartão", "Porto Seguro", 2307, 1929, 910, "OPERACAO", 84, 169141.21, 12, 13750.2], ["2026-03-03", "1250-Movida", "Movida", 631, 490, 79, "OPERACAO", 35, 36402.39, 20, 22439.84], ["2026-03-03", "1251-Movida Sem Garantia - ZERO KM", "Movida", 162, 128, 28, "OPERACAO", 12, 41261.92, 2, 1922.13], ["2026-03-03", "1252-Movida - PJ", "Movida", 141, 88, 57, "OPERACAO", 34, 91588.0, 17, 52080.09], ["2026-03-03", "1253-Movida - PJ S/ Veículos", "Movida", 36, 22, 19, "OPERACAO", 9, 8502.87, 6, 5109.84], ["2026-03-03", "1255-Movida - Participações", "Movida", 6, 4, 4, "OPERACAO", 4, 9482.02, 4, 9482.02], ["2026-03-03", "1256-Movida Memo", "Movida", 6, 5, 5, "OPERACAO", 4, 2101.93, 4, 2101.93], ["2026-03-03", "1257- Movida - ZERO KM Com Veiculos", "Movida", 268, 198, 114, "OPERACAO", 46, 139699.11, 15, 48553.39], ["2026-03-04", "C6 BANK", "C6 BANK", 1759, 1759, 418, "I.A", 77, 149423.83, 0, 0], ["2026-03-04", "C6 BANK", "C6 BANK", 3138, 2369, 1215, "OPERACAO", 406, 935398.5, 0, 0], ["2026-03-05", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 2203, 2203, 167, "I.A", 23, 31383.44, 5, 3716.58], ["2026-03-05", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 2076, 2076, 83, "I.A", 3, 36339.35, 0, 0], ["2026-03-05", "0162-Banco Original - PP BANK", "Banco Original", 3, 3, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0191-Pravaler Cyber", "Pravaler", 630, 630, 4, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0266-Kroton PEP Presencial(RAID)", "Kroton", 25, 23, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0267-Kroton PEP EAD (RAID)", "Kroton", 1, 1, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0268-Anhanguera Campus (RAID)", "Kroton", 556, 556, 13, "I.A", 3, 1792.74, 2, 1540.32], ["2026-03-05", "0269-Anhanguera EAD (RAID)", "Kroton", 2440, 2436, 198, "I.A", 13, 2153.64, 3, 585.22], ["2026-03-05", "0270-Unopar EAD - (RAID)", "Kroton", 517, 517, 27, "I.A", 5, 2052.68, 1, 245.23], ["2026-03-05", "0271-DM Presencial (RAID)", "Kroton", 163, 163, 5, "I.A", 1, 268.81, 0, 0], ["2026-03-05", "0272-DM EAD (RAID)", "Kroton", 30, 30, 3, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0664-Via Varejo - FIDC/CDCI Prejuízo", "Via Varejo", 841, 841, 40, "I.A", 4, 848.25, 0, 0], ["2026-03-05", "1150-Porto Seguro CDC", "Porto Seguro", 2, 2, 2, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "1152-CDC Amigável", "Porto Seguro", 248, 248, 24, "I.A", 1, 951.54, 0, 0], ["2026-03-05", "1153-Porto Seguro Cartão", "Porto Seguro", 1267, 1267, 48, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "1250-Movida", "Movida", 480, 480, 27, "I.A", 3, 1518.44, 0, 0], ["2026-03-05", "1251-Movida Sem Garantia - ZERO KM", "Movida", 3, 3, 1, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "1252-Movida - PJ", "Movida", 2, 2, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "1253-Movida - PJ S/ Veículos", "Movida", 7, 7, 0, "I.A", "NULL", 0, 0, 0], ["2026-03-05", "0150-Banco do Brasil - Consórcio", "Banco do Brasil", 3719, 3314, 1543, "OPERACAO", 1136, 3141869.62, 695, 1910460.2], ["2026-03-05", "0152-Banco do Brasil - Recovery", "Banco do Brasil", 893, 775, 151, "OPERACAO", 35, 267871.25, 22, 168369.85], ["2026-03-05", "0161-Banco Original", "Banco Original", 18, 13, 0, "OPERACAO", "NULL", 0, 0, 0], ["2026-03-05", "0162-Banco Original - PP BANK", "Banco Original", 6065, 4368, 591, "OPERACAO", 242, 22924.66, 217, 5947.34], ["2026-03-05", "0191-Pravaler Cyber", "Pravaler", 1345, 365, 50, "OPERACAO", 16, 25581.67, 0, 0], ["2026-03-05", "0192-Pravaler Cyber Obsoleto", "Pravaler", 157, 19, 1, "OPERACAO", 7, 30048.93, 0, 0], ["2026-03-05", "0266-Kroton PEP Presencial(RAID)", "Kroton", 1598, 684, 442, "OPERACAO", 21, 39501.39, 8, 9222.53]];
+
+let allData = EMBEDDED.map(r => {
+  const o={};
+  HEADERS.forEach((h,i)=>{ 
+    let v=r[i];
+    if(['ACIO','ALO','CPC','ACORDO','PAGAMENTOS'].includes(h)) v=Number(v)||0;
+    if(['VALOR','VALOR_PGTO'].includes(h)) v=parseFloat(String(v||'0').replace(',','.'))||0;
+    o[h]=v;
+  });
+  return o;
+});
+let charts={};
+
+function parseXLSX(data) {
+  const wb=XLSX.read(data,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  const rawHeaders=json[0];
+  // Normaliza nomes de colunas (minúsculo → maiúsculo padrão)
+  const headers=rawHeaders.map(h=>COL_MAP[String(h).toLowerCase()]||String(h).toUpperCase());
+  return json.slice(1).filter(r=>r.some(v=>v!==null)).map(r=>{
+    const o={};
+    headers.forEach((h,i)=>{
+      let v=r[i];
+      if(h==='DATA_REF'&&v) {
+        if(typeof v==='number') {
+          const d=new Date(Math.round((v-25569)*86400*1000));
+          v=d.toISOString().slice(0,10);
+        } else {
+          v=String(v).slice(0,10);
+        }
+      }
+      if(['ACIO','ALO','CPC','ACORDO','PAGAMENTOS'].includes(h)) v=Number(v)||0;
+      if(['VALOR','VALOR_PGTO'].includes(h)) v=parseFloat(String(v||'0').replace(',','.'))||0;
+      o[h]=v;
+    });
+    return o;
+  });
+}
+
+function handleUpload(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      allData=parseXLSX(new Uint8Array(ev.target.result));
+      document.getElementById('uploadLabel').textContent='✓ '+file.name;
+      rebuildFilters(); render();
+    } catch(err){alert('Erro: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function getUnique(key) {
+  return [...new Set(allData.map(r=>r[key]).filter(v=>v&&v!=='NULL'))].sort();
+}
+
+function rebuildFilters() {
+  const rebuild=(sel,vals)=>{
+    const cur=sel.value; sel.innerHTML='<option value="ALL">Todos</option>';
+    vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(String(v)===cur)o.selected=true;sel.appendChild(o);});
+  };
+  rebuild(document.getElementById('filterEmpresa'),getUnique('EMPRESA'));
+  rebuild(document.getElementById('filterCarteira'),getUnique('CARTEIRA'));
+  rebuild(document.getElementById('filterCanal'),getUnique('CANAL'));
+
+  // Set date range defaults
+  const datas=getUnique('DATA_REF');
+  const ini=document.getElementById('filterDateIni');
+  const fim=document.getElementById('filterDateFim');
+  if(!ini.value && datas.length) { ini.value=datas[0]; fim.value=datas[datas.length-1]; }
+}
+
+function getFiltered() {
+  const emp=document.getElementById('filterEmpresa').value;
+  const cart=document.getElementById('filterCarteira').value;
+  const canal=document.getElementById('filterCanal').value;
+  const ini=document.getElementById('filterDateIni').value;
+  const fim=document.getElementById('filterDateFim').value;
+  return allData.filter(r=>{
+    if(emp!=='ALL'&&r.EMPRESA!==emp) return false;
+    if(cart!=='ALL'&&r.CARTEIRA!==cart) return false;
+    if(canal!=='ALL'&&r.CANAL!==canal) return false;
+    if(ini&&r.DATA_REF<ini) return false;
+    if(fim&&r.DATA_REF>fim) return false;
+    return true;
+  });
+}
+
+const fmt=n=>Number(n).toLocaleString('pt-BR');
+const fmtVal=n=>n>=1000000?(n/1000000).toFixed(1).replace('.',',')+'M':n>=1000?(n/1000).toFixed(1).replace('.',',')+'k':Number(n.toFixed(0)).toLocaleString('pt-BR');
+const fmtCur=n=>'R$ '+Number(n.toFixed(2)).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const pctN=(a,b)=>b>0?(a/b*100):0;
+const pctS=(a,b)=>b>0?(a/b*100).toFixed(1)+'%':'—';
+
+function sumByCanal(data) {
+  const res={};
+  data.forEach(r=>{
+    const c=r.CANAL||'?';
+    if(!res[c]) res[c]={ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+    res[c].ACIO+=(r.ACIO||0); res[c].ALO+=(r.ALO||0); res[c].CPC+=(r.CPC||0);
+    res[c].ACORDO+=(r.ACORDO||0); res[c].VALOR+=(r.VALOR||0);
+    res[c].PAGAMENTOS+=(r.PAGAMENTOS||0); res[c].VALOR_PGTO+=(r.VALOR_PGTO||0);
+  });
+  return res;
+}
+
+// ── KPI ──────────────────────────────────────────────────────────
+function renderKPI(byCanal) {
+  const ia=byCanal['I.A']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+  const op=byCanal['OPERACAO']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+  const total={ACIO:ia.ACIO+op.ACIO,ALO:ia.ALO+op.ALO,CPC:ia.CPC+op.CPC,ACORDO:ia.ACORDO+op.ACORDO,VALOR:ia.VALOR+op.VALOR,PAGAMENTOS:ia.PAGAMENTOS+op.PAGAMENTOS,VALOR_PGTO:ia.VALOR_PGTO+op.VALOR_PGTO};
+
+  const cards=[
+    {label:'Total Acordos',val:fmt(total.ACORDO),sub:'IA + Operação',cls:'',ia:fmt(ia.ACORDO),op:fmt(op.ACORDO)},
+    {label:'Acordos IA',val:fmt(ia.ACORDO),sub:pctS(ia.ACORDO,total.ACORDO)+' do total',cls:'ia',ia:null,op:null},
+    {label:'Acordos Operação',val:fmt(op.ACORDO),sub:pctS(op.ACORDO,total.ACORDO)+' do total',cls:'op',ia:null,op:null},
+    {label:'Conv. IA (CPC→Ac.)',val:pctS(ia.ACORDO,ia.CPC),sub:'CPC: '+fmt(ia.CPC),cls:'ia',ia:null,op:null},
+    {label:'Conv. Op. (CPC→Ac.)',val:pctS(op.ACORDO,op.CPC),sub:'CPC: '+fmt(op.CPC),cls:'op',ia:null,op:null},
+    {label:'Valor Total',val:'R$ '+fmtVal(total.VALOR),sub:'IA: R$ '+fmtVal(ia.VALOR)+' | Op: R$ '+fmtVal(op.VALOR),cls:'green',ia:null,op:null},
+  ];
+  document.getElementById('kpiGrid').innerHTML=cards.map(c=>`
+    <div class="kpi-card ${c.cls}">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.val}</div>
+      ${c.ia!==null?`<div class="kpi-compare"><span class="kpi-ia">IA: ${c.ia}</span><span class="kpi-op">Op: ${c.op}</span></div>`:''}
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ── DUAL FUNNEL ──────────────────────────────────────────────────
+function renderDualFunnel(byCanal) {
+  const ia=byCanal['I.A']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0};
+  const op=byCanal['OPERACAO']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0};
+  const stages=[
+    {key:'ACIO',label:'Acionamento'},
+    {key:'ALO',label:'Alô'},
+    {key:'CPC',label:'CPC'},
+    {key:'ACORDO',label:'Acordo'},
+    {key:'PAGAMENTOS',label:'Pagamento'},
+  ];
+
+  const maxVal=Math.max(ia.ACIO,op.ACIO,1);
+
+  let iaHTML='', opHTML='', labHTML='';
+  stages.forEach((s,i)=>{
+    const iaVal=ia[s.key]||0, opVal=op[s.key]||0;
+    const iaW=Math.max(20,Math.round(iaVal/maxVal*100));
+    const opW=Math.max(20,Math.round(opVal/maxVal*100));
+    const iaPct=i===0?'100,0%':pctS(iaVal,ia.ACIO);
+    const opPct=i===0?'100,0%':pctS(opVal,op.ACIO);
+    // cascata (vs previous stage)
+    const iaPrev=i===0?iaVal:(ia[stages[i-1].key]||1);
+    const opPrev=i===0?opVal:(op[stages[i-1].key]||1);
+    const iaCasc=i===0?'—':pctS(iaVal,iaPrev);
+    const opCasc=i===0?'—':pctS(opVal,opPrev);
+
+    iaHTML+=`<div style="display:flex;align-items:center;margin-bottom:4px;height:56px;border-top:1px dashed ${i===0?'transparent':'#30363d'}">
+      <div style="font-size:10px;color:var(--muted);width:42px;text-align:right;padding-right:6px">${iaPct}</div>
+      <div style="flex:1;display:flex;justify-content:flex-end;">
+        <div class="f-bar ia" style="width:${iaW}%;justify-content:center">
+          <span class="f-val">${iaVal>0?fmt(iaVal):'--'}</span>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#00c8ff88;width:38px;text-align:left;padding-left:6px">${i>0?iaCasc:''}</div>
+    </div>`;
+
+    opHTML+=`<div style="display:flex;align-items:center;margin-bottom:4px;height:56px;border-top:1px dashed ${i===0?'transparent':'#30363d'}">
+      <div style="font-size:10px;color:#00e5a088;width:38px;text-align:right;padding-right:6px">${i>0?opCasc:''}</div>
+      <div style="flex:1;display:flex;justify-content:flex-start;">
+        <div class="f-bar op" style="width:${opW}%;justify-content:center">
+          <span class="f-val">${opVal>0?fmt(opVal):'--'}</span>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);width:42px;text-align:left;padding-left:6px">${opPct}</div>
+    </div>`;
+
+    labHTML+=`<div style="height:56px;display:flex;align-items:center;justify-content:center;border-top:1px dashed ${i===0?'transparent':'#30363d'};font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;color:var(--text)">${s.label}</div>`;
+  });
+
+  document.getElementById('funnelIA').innerHTML=iaHTML;
+  document.getElementById('funnelOP').innerHTML=opHTML;
+  document.getElementById('funnelLabels').innerHTML=labHTML;
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function cOpts(unit,labels=true){
+  return {
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#8b949e',font:{family:'Barlow',size:11}}},
+      tooltip:{backgroundColor:'#1c2333',titleColor:'#e6edf3',bodyColor:'#8b949e'},
+      datalabels:labels?{display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,color:'#e6edf3',font:{family:'Barlow Condensed',size:10,weight:'700'},anchor:'end',align:'end',offset:2,clamp:true,formatter:(v)=>v>=1000?fmtVal(v):v.toLocaleString('pt-BR')}:{display:false}
+    },
+    scales:{
+      x:{ticks:{color:'#8b949e',font:{family:'Barlow',size:10}},grid:{color:'#30363d'}},
+      y:{ticks:{color:'#8b949e',font:{family:'Barlow',size:10},callback:v=>v+(unit||'')},grid:{color:'#30363d'}}
+    },
+    layout:{padding:{top:22}}
+  };
+}
+
+function renderCharts(data) {
+  // Acordos por dia IA vs Op
+  const byDia={};
+  data.forEach(r=>{
+    if(!byDia[r.DATA_REF])byDia[r.DATA_REF]={'I.A':0,'OPERACAO':0};
+    byDia[r.DATA_REF][r.CANAL]=(byDia[r.DATA_REF][r.CANAL]||0)+(r.ACORDO||0);
+  });
+  const dias=Object.keys(byDia).sort();
+
+  destroyChart('chartAcordoDia');
+  charts['chartAcordoDia']=new Chart(document.getElementById('chartAcordoDia').getContext('2d'),{
+    type:'bar',
+    data:{labels:dias.map(d=>d.slice(5)),datasets:[
+      {label:'I.A',data:dias.map(d=>byDia[d]['I.A']||0),backgroundColor:'#00c8ff44',borderColor:'#00c8ff',borderWidth:2,borderRadius:3},
+      {label:'Operação',data:dias.map(d=>byDia[d]['OPERACAO']||0),backgroundColor:'#00e5a044',borderColor:'#00e5a0',borderWidth:2,borderRadius:3}
+    ]},
+    options:cOpts('')
+  });
+
+  // Conv CPC→Acordo por dia
+  const byDiaConv={};
+  data.forEach(r=>{
+    if(!byDiaConv[r.DATA_REF])byDiaConv[r.DATA_REF]={'I.A':{CPC:0,ACORDO:0},'OPERACAO':{CPC:0,ACORDO:0}};
+    byDiaConv[r.DATA_REF][r.CANAL].CPC+=(r.CPC||0);
+    byDiaConv[r.DATA_REF][r.CANAL].ACORDO+=(r.ACORDO||0);
+  });
+  destroyChart('chartConvDia');
+  charts['chartConvDia']=new Chart(document.getElementById('chartConvDia').getContext('2d'),{
+    type:'line',
+    data:{labels:dias.map(d=>d.slice(5)),datasets:[
+      {label:'I.A',data:dias.map(d=>parseFloat(pctN(byDiaConv[d]['I.A'].ACORDO,byDiaConv[d]['I.A'].CPC).toFixed(1))),borderColor:'#00c8ff',backgroundColor:'#00c8ff22',borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointBackgroundColor:'#00c8ff'},
+      {label:'Operação',data:dias.map(d=>parseFloat(pctN(byDiaConv[d]['OPERACAO'].ACORDO,byDiaConv[d]['OPERACAO'].CPC).toFixed(1))),borderColor:'#00e5a0',backgroundColor:'#00e5a022',borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointBackgroundColor:'#00e5a0'}
+    ]},
+    options:{...cOpts('%'),scales:{...cOpts('%').scales,y:{...cOpts('%').scales.y,min:0}}}
+  });
+
+  // Valor por canal
+  const byC=sumByCanal(data);
+  destroyChart('chartValor');
+  charts['chartValor']=new Chart(document.getElementById('chartValor').getContext('2d'),{
+    type:'bar',
+    data:{labels:Object.keys(byC),datasets:[
+      {label:'Valor Acordo',data:Object.values(byC).map(c=>Math.round(c.VALOR)),backgroundColor:['#00c8ff88','#00e5a088'],borderColor:['#00c8ff','#00e5a0'],borderWidth:1,borderRadius:4}
+    ]},
+    options:{...cOpts(''),plugins:{...cOpts('').plugins,datalabels:{...cOpts('').plugins.datalabels,formatter:v=>'R$ '+fmtVal(v)}}}
+  });
+
+  // Acordos por empresa
+  const byEmp={};
+  data.forEach(r=>{if(!byEmp[r.EMPRESA])byEmp[r.EMPRESA]={'I.A':0,'OPERACAO':0};byEmp[r.EMPRESA][r.CANAL]=(byEmp[r.EMPRESA][r.CANAL]||0)+(r.ACORDO||0);});
+  const emps=Object.keys(byEmp).sort();
+  destroyChart('chartEmpresa');
+  charts['chartEmpresa']=new Chart(document.getElementById('chartEmpresa').getContext('2d'),{
+    type:'bar',
+    data:{labels:emps,datasets:[
+      {label:'I.A',data:emps.map(e=>byEmp[e]['I.A']||0),backgroundColor:'#00c8ff44',borderColor:'#00c8ff',borderWidth:2,borderRadius:3},
+      {label:'Operação',data:emps.map(e=>byEmp[e]['OPERACAO']||0),backgroundColor:'#00e5a044',borderColor:'#00e5a0',borderWidth:2,borderRadius:3}
+    ]},
+    options:{...cOpts('',false),plugins:{...cOpts('',false).plugins,datalabels:{display:false},legend:{labels:{color:'#8b949e',font:{family:'Barlow',size:11}}}}}
+  });
+}
+
+// ── DETAIL TABLE ─────────────────────────────────────────────────
+function renderDetailTable(data) {
+  const grouped={};
+  data.forEach(r=>{
+    const k=r.EMPRESA+'|||'+r.CARTEIRA+'|||'+r.CANAL;
+    if(!grouped[k]) grouped[k]={emp:r.EMPRESA,cart:r.CARTEIRA,canal:r.CANAL,ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+    grouped[k].ACIO+=(r.ACIO||0); grouped[k].ALO+=(r.ALO||0); grouped[k].CPC+=(r.CPC||0);
+    grouped[k].ACORDO+=(r.ACORDO||0); grouped[k].VALOR+=(r.VALOR||0);
+    grouped[k].PAGAMENTOS+=(r.PAGAMENTOS||0); grouped[k].VALOR_PGTO+=(r.VALOR_PGTO||0);
+  });
+  const rows=Object.values(grouped).sort((a,b)=>a.emp.localeCompare(b.emp)||a.cart.localeCompare(b.cart));
+  const conv=r=>pctN(r.ACORDO,r.CPC);
+  document.getElementById('detailTableBody').innerHTML=rows.map(r=>{
+    const c=conv(r);
+    const cls=c>=30?'pct-high':c>=15?'pct-mid':'pct-low';
+    const canal=r.canal==='I.A'?'<span class="badge badge-ia">I.A</span>':'<span class="badge badge-op">OPERAÇÃO</span>';
+    return `<tr><td>${r.emp}</td><td>${r.cart}</td><td>${canal}</td><td>${fmt(r.ACIO)}</td><td>${fmt(r.ALO)}</td><td>${fmt(r.CPC)}</td><td>${fmt(r.ACORDO)}</td><td><span class="badge ${cls}">${pctS(r.ACORDO,r.CPC)}</span></td><td>${fmtCur(r.VALOR)}</td><td>${r.PAGAMENTOS>0?fmt(r.PAGAMENTOS):'—'}</td><td>${r.VALOR_PGTO>0?fmtCur(r.VALOR_PGTO):'—'}</td></tr>`;
+  }).join('');
+}
+
+// ── ANÁLISE ───────────────────────────────────────────────────────
+function generateAnalysis() {
+  const btn=document.getElementById('analysisBtn');
+  const body=document.getElementById('analysisBody');
+  btn.disabled=true; btn.textContent='Analisando...';
+  body.innerHTML='<span style="color:var(--muted);font-style:italic">Processando dados...</span>';
+  setTimeout(()=>{
+    const data=getFiltered();
+    const byC=sumByCanal(data);
+    const ia=byC['I.A']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0};
+    const op=byC['OPERACAO']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0};
+    const total={ACORDO:ia.ACORDO+op.ACORDO,VALOR:ia.VALOR+op.VALOR};
+
+    const txIACPC=pctN(ia.ACORDO,ia.CPC);
+    const txOPCPC=pctN(op.ACORDO,op.CPC);
+    const txIAALO=pctN(ia.ALO,ia.ACIO);
+    const txOPALO=pctN(op.ALO,op.ACIO);
+    const pctIA=pctN(ia.ACORDO,total.ACORDO);
+    const pctOP=pctN(op.ACORDO,total.ACORDO);
+    const ticketIA=ia.ACORDO>0?ia.VALOR/ia.ACORDO:0;
+    const ticketOP=op.ACORDO>0?op.VALOR/op.ACORDO:0;
+
+    let html='';
+    html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#00c8ff;text-transform:uppercase;margin-bottom:7px">📊 Performance Geral</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
+    html+=`<li>• Total de acordos: <strong>${fmt(total.ACORDO)}</strong> — IA: <span style="color:#00c8ff">${fmt(ia.ACORDO)} (${pctIA.toFixed(1)}%)</span> | Operação: <span style="color:#00e5a0">${fmt(op.ACORDO)} (${pctOP.toFixed(1)}%)</span></li>`;
+    html+=`<li>• Valor total: <strong>${fmtCur(total.VALOR)}</strong> — IA: <span style="color:#00c8ff">${fmtCur(ia.VALOR)}</span> | Op: <span style="color:#00e5a0">${fmtCur(op.VALOR)}</span></li>`;
+    html+=`<li>• Ticket médio IA: <strong>${fmtCur(ticketIA)}</strong> vs Operação: <strong>${fmtCur(ticketOP)}</strong>`;
+    if(ticketIA>ticketOP) html+=` <span style="color:#3fb950">— IA com ticket maior (+${((ticketIA/Math.max(ticketOP,1)-1)*100).toFixed(0)}%)</span>`;
+    else if(ticketOP>ticketIA) html+=` <span style="color:#d29922">— Operação com ticket maior (+${((ticketOP/Math.max(ticketIA,1)-1)*100).toFixed(0)}%)</span>`;
+    html+=`</li></ul></div>`;
+
+    html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#d29922;text-transform:uppercase;margin-bottom:7px">🔍 Eficiência do Funil</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
+    html+=`<li>• Taxa ALO/Acionamento — IA: <span style="color:#00c8ff"><strong>${txIAALO.toFixed(1)}%</strong></span> | Operação: <span style="color:#00e5a0"><strong>${txOPALO.toFixed(1)}%</strong></span></li>`;
+    html+=`<li>• Conversão CPC→Acordo — IA: <span style="color:#00c8ff"><strong>${txIACPC.toFixed(1)}%</strong></span> | Operação: <span style="color:#00e5a0"><strong>${txOPCPC.toFixed(1)}%</strong></span>`;
+    if(txIACPC>txOPCPC) html+=` <span style="color:#3fb950">— IA mais eficiente em fechamento</span>`;
+    else if(txOPCPC>txIACPC) html+=` <span style="color:#3fb950">— Operação mais eficiente em fechamento</span>`;
+    html+=`</li></ul></div>`;
+
+    const alertas=[];
+    if(txIACPC<10) alertas.push('🔴 Conversão CPC→Acordo da IA abaixo de 10% — revisar script e timing de abordagem');
+    if(txOPCPC<15) alertas.push('🟡 Conversão da Operação abaixo de 15% — avaliar treinamento de negociação');
+    if(pctIA<20) alertas.push('🟡 IA respondendo por menos de 20% dos acordos — verificar cobertura de discagem');
+    if(ticketIA<ticketOP*0.7) alertas.push('🟡 Ticket médio IA significativamente menor — IA pode estar fechando acordos de menor valor');
+
+    if(alertas.length>0) {
+      html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#f85149;text-transform:uppercase;margin-bottom:7px">⚠ Pontos de Atenção</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
+      alertas.forEach(a=>{html+=`<li>${a}</li>`;});
+      html+=`</ul></div>`;
+    }
+
+    body.innerHTML=html;
+    btn.disabled=false; btn.innerHTML='✦ Atualizar Análise';
+  },500);
+}
+
+// ── MAIN RENDER ──────────────────────────────────────────────────
+function render() {
+  const filtered=getFiltered();
+  const byCanal=sumByCanal(filtered);
+  renderKPI(byCanal);
+  renderDualFunnel(byCanal);
+  renderCharts(filtered);
+  renderDetailTable(filtered);
+}
+
+rebuildFilters();
+render();
+</script>
+</body>
+</html>
