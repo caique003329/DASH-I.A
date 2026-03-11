@@ -148,14 +148,70 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 .pct-low{background:#3a1a1a;color:#f85149;}
 .sort-arrow{margin-left:3px;font-size:9px;}
 
-/* ANALYSIS */
-.analysis-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
-.analysis-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.analysis-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
-.analysis-btn{background:linear-gradient(135deg,#1a4f9c,#2e7de9);border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:opacity .2s;}
-.analysis-btn:hover{opacity:.85;}
-.analysis-btn:disabled{opacity:.5;cursor:not-allowed;}
-.analysis-body{min-height:80px;color:var(--text);font-size:13px;line-height:1.7;}
+/* ANALYSIS AI */
+.ai-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.ai-panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,#0d1a2e,var(--surface));}
+.ai-panel-title{display:flex;align-items:center;gap:10px;}
+.ai-panel-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1a4f9c,#2e7de9);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ai-panel-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text);}
+.ai-panel-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.ai-panel-actions{display:flex;gap:8px;align-items:center;}
+.ai-btn{border:none;color:#fff;padding:9px 18px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.ai-btn-primary{background:linear-gradient(135deg,#1a4f9c,#2e7de9);}
+.ai-btn-primary:hover{background:linear-gradient(135deg,#2e7de9,#4a9df0);}
+.ai-btn-secondary{background:var(--surface2);border:1px solid var(--border);}
+.ai-btn-secondary:hover{border-color:var(--accent);}
+.ai-btn:disabled{opacity:.45;cursor:not-allowed;}
+.ai-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 22px;background:var(--surface2);}
+.ai-tab{padding:10px 18px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.ai-tab:hover{color:var(--text);}
+.ai-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.ai-body{padding:22px;min-height:200px;}
+.ai-tab-content{display:none;}
+.ai-tab-content.active{display:block;}
+.ai-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:12px;color:var(--muted);}
+.ai-placeholder-icon{font-size:32px;opacity:.4;}
+.ai-placeholder-text{font-size:13px;text-align:center;max-width:320px;line-height:1.6;}
+.ai-streaming{color:var(--text);font-size:13px;line-height:1.8;}
+.ai-streaming h3{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.ai-streaming h3:first-child{margin-top:0;}
+.ai-streaming h3.blue{color:#00c8ff;}
+.ai-streaming h3.green{color:#3fb950;}
+.ai-streaming h3.orange{color:#d29922;}
+.ai-streaming h3.red{color:#f85149;}
+.ai-streaming h3.purple{color:#a78bfa;}
+.ai-decision-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:6px;}
+.ai-decision-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;border-left:3px solid;}
+.ai-decision-card.urgente{border-left-color:#f85149;}
+.ai-decision-card.importante{border-left-color:#d29922;}
+.ai-decision-card.oportunidade{border-left-color:#3fb950;}
+.ai-decision-card.estrategico{border-left-color:#a78bfa;}
+.ai-dc-badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.ai-dc-badge.urgente{color:#f85149;}
+.ai-dc-badge.importante{color:#d29922;}
+.ai-dc-badge.oportunidade{color:#3fb950;}
+.ai-dc-badge.estrategico{color:#a78bfa;}
+.ai-dc-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.ai-dc-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.ai-dc-action{margin-top:8px;font-size:11px;font-weight:700;color:var(--accent);}
+.ai-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:14px;}
+.ai-loader-dots{display:flex;gap:6px;}
+.ai-loader-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:dotPulse 1.4s infinite ease-in-out;}
+.ai-loader-dot:nth-child(2){animation-delay:.2s;}
+.ai-loader-dot:nth-child(3){animation-delay:.4s;}
+@keyframes dotPulse{0%,80%,100%{transform:scale(.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+.ai-loader-text{font-size:12px;color:var(--muted);font-style:italic;}
+.ai-cursor{display:inline-block;width:2px;height:14px;background:var(--accent);margin-left:2px;animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+.ai-scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+.ai-scenario{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.ai-scenario-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.ai-scenario-label.otimista{color:#3fb950;}
+.ai-scenario-label.pessimista{color:#f85149;}
+.ai-scenario-label.realista{color:#d29922;}
+.ai-scenario-label.disruptivo{color:#a78bfa;}
+.ai-scenario-value{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text);}
+.ai-scenario-desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -321,14 +377,55 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
     </div>
   </div>
 
-  <!-- ANALYSIS -->
+  <!-- AI ANALYSIS PANEL -->
   <div>
-    <div class="analysis-card">
-      <div class="analysis-header">
-        <div class="analysis-title">✦ Comentários de Análise</div>
-        <button class="analysis-btn" id="analysisBtn" onclick="generateAnalysis()">✦ Gerar Análise</button>
+    <div class="section-title">Central de Inteligência — Análise & Decisão</div>
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <div class="ai-panel-icon">✦</div>
+          <div>
+            <div class="ai-panel-label">Central de Inteligência Analítica</div>
+            <div class="ai-panel-sub">Análise local · Diagnóstico completo + Recomendações estratégicas</div>
+          </div>
+        </div>
+        <div class="ai-panel-actions">
+          <button class="ai-btn ai-btn-secondary" id="btnClearAnalysis" onclick="clearAnalysis()" style="display:none">✕ Limpar</button>
+          <button class="ai-btn ai-btn-primary" id="btnRunAnalysis" onclick="runAIAnalysis()">✦ Gerar Análise Completa</button>
+        </div>
       </div>
-      <div class="analysis-body" id="analysisBody">Clique em <strong>Gerar Análise</strong> para obter insights automáticos sobre a performance IA vs Operação.</div>
+      <div class="ai-tabs">
+        <div class="ai-tab active" onclick="switchTab('diagnostico')" id="tab-diagnostico">📊 Diagnóstico</div>
+        <div class="ai-tab" onclick="switchTab('decisoes')" id="tab-decisoes">🎯 Tomada de Decisão</div>
+        <div class="ai-tab" onclick="switchTab('cenarios')" id="tab-cenarios">🔭 Cenários</div>
+        <div class="ai-tab" onclick="switchTab('acoes')" id="tab-acoes">⚡ Plano de Ação</div>
+      </div>
+      <div class="ai-body">
+        <div class="ai-tab-content active" id="content-diagnostico">
+          <div class="ai-placeholder">
+            <div class="ai-placeholder-icon">📊</div>
+            <div class="ai-placeholder-text">Clique em <strong>Gerar Análise Completa</strong> para que a IA faça um diagnóstico profundo dos seus dados de cobrança — identificando gargalos, anomalias e oportunidades escondidas.</div>
+          </div>
+        </div>
+        <div class="ai-tab-content" id="content-decisoes">
+          <div class="ai-placeholder">
+            <div class="ai-placeholder-icon">🎯</div>
+            <div class="ai-placeholder-text">A IA irá gerar um painel de decisões estratégicas priorizadas por impacto — com ações concretas para gestores e operadores.</div>
+          </div>
+        </div>
+        <div class="ai-tab-content" id="content-cenarios">
+          <div class="ai-placeholder">
+            <div class="ai-placeholder-icon">🔭</div>
+            <div class="ai-placeholder-text">Projeções de cenários baseadas no comportamento atual dos dados — otimista, realista, pessimista e estratégico.</div>
+          </div>
+        </div>
+        <div class="ai-tab-content" id="content-acoes">
+          <div class="ai-placeholder">
+            <div class="ai-placeholder-icon">⚡</div>
+            <div class="ai-placeholder-text">Plano de ação detalhado com responsáveis, prazos sugeridos e métricas de acompanhamento.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -905,60 +1002,438 @@ function exportTableCSV(){
   a.click();
 }
 
-// ── ANALYSIS ──────────────────────────────────────────────────────
-function generateAnalysis(){
-  const btn=document.getElementById('analysisBtn');
-  const body=document.getElementById('analysisBody');
-  btn.disabled=true; btn.textContent='Analisando...';
-  body.innerHTML='<span style="color:var(--muted);font-style:italic">Processando dados...</span>';
-  setTimeout(()=>{
-    const data=getFiltered();
-    const byC=sumByCanal(data);
-    const ia=byC['I.A']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0};
-    const op=byC['OPERACAO']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0};
-    const total={ACORDO:ia.ACORDO+op.ACORDO,VALOR:ia.VALOR+op.VALOR};
-    const txIACPC=pctN(ia.ACORDO,ia.CPC);
-    const txOPCPC=pctN(op.ACORDO,op.CPC);
-    const txIAALO=pctN(ia.ALO,ia.ACIO);
-    const txOPALO=pctN(op.ALO,op.ACIO);
-    const pctIA=pctN(ia.ACORDO,total.ACORDO);
-    const pctOP=pctN(op.ACORDO,total.ACORDO);
-    const ticketIA=ia.ACORDO>0?ia.VALOR/ia.ACORDO:0;
-    const ticketOP=op.ACORDO>0?op.VALOR/op.ACORDO:0;
-    const txPgtoIA=pctN(ia.PAGAMENTOS,ia.ACORDO);
-    const txPgtoOP=pctN(op.PAGAMENTOS,op.ACORDO);
+// ── ANÁLISE LOCAL (sem API externa) ──────────────────────────────
 
-    let html='';
-    html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#00c8ff;text-transform:uppercase;margin-bottom:7px">📊 Performance Geral</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
-    html+=`<li>• Total de acordos: <strong>${fmt(total.ACORDO)}</strong> — IA: <span style="color:#00c8ff">${fmt(ia.ACORDO)} (${pctIA.toFixed(1)}%)</span> | Operação: <span style="color:#00e5a0">${fmt(op.ACORDO)} (${pctOP.toFixed(1)}%)</span></li>`;
-    html+=`<li>• Valor total: <strong>${fmtCur(total.VALOR)}</strong> — IA: <span style="color:#00c8ff">${fmtCur(ia.VALOR)}</span> | Op: <span style="color:#00e5a0">${fmtCur(op.VALOR)}</span></li>`;
-    html+=`<li>• Ticket médio IA: <strong>${fmtCur(ticketIA)}</strong> vs Operação: <strong>${fmtCur(ticketOP)}</strong>`;
-    if(ticketIA>ticketOP) html+=` <span style="color:#3fb950">— IA com ticket maior (+${((ticketIA/Math.max(ticketOP,1)-1)*100).toFixed(0)}%)</span>`;
-    else if(ticketOP>ticketIA) html+=` <span style="color:#d29922">— Operação com ticket maior (+${((ticketOP/Math.max(ticketIA,1)-1)*100).toFixed(0)}%)</span>`;
-    html+=`</li>`;
-    html+=`<li>• Taxa de pagamento — IA: <span style="color:#00c8ff"><strong>${txPgtoIA.toFixed(1)}%</strong></span> | Operação: <span style="color:#00e5a0"><strong>${txPgtoOP.toFixed(1)}%</strong></span></li>`;
-    html+=`</ul></div>`;
-    html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#d29922;text-transform:uppercase;margin-bottom:7px">🔍 Eficiência do Funil</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
-    html+=`<li>• Taxa ALO/Acionamento — IA: <span style="color:#00c8ff"><strong>${txIAALO.toFixed(1)}%</strong></span> | Operação: <span style="color:#00e5a0"><strong>${txOPALO.toFixed(1)}%</strong></span></li>`;
-    html+=`<li>• Conversão CPC→Acordo — IA: <span style="color:#00c8ff"><strong>${txIACPC.toFixed(1)}%</strong></span> | Operação: <span style="color:#00e5a0"><strong>${txOPCPC.toFixed(1)}%</strong></span>`;
-    if(txIACPC>txOPCPC) html+=` <span style="color:#3fb950">— IA mais eficiente em fechamento</span>`;
-    else if(txOPCPC>txIACPC) html+=` <span style="color:#3fb950">— Operação mais eficiente em fechamento</span>`;
-    html+=`</li></ul></div>`;
-    const alertas=[];
-    if(txIACPC<10) alertas.push('🔴 Conversão CPC→Acordo da IA abaixo de 10% — revisar script e timing de abordagem');
-    if(txOPCPC<15) alertas.push('🟡 Conversão da Operação abaixo de 15% — avaliar treinamento de negociação');
-    if(pctIA<20) alertas.push('🟡 IA respondendo por menos de 20% dos acordos — verificar cobertura de discagem');
-    if(ticketIA<ticketOP*0.7) alertas.push('🟡 Ticket médio IA significativamente menor — IA pode estar fechando acordos de menor valor');
-    if(txPgtoIA<30) alertas.push('🟡 Taxa de pagamento IA abaixo de 30% — verificar qualidade dos acordos firmados');
-    if(alertas.length>0){
-      html+=`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:#f85149;text-transform:uppercase;margin-bottom:7px">⚠ Pontos de Atenção</div><ul style="list-style:none;padding-left:8px;display:flex;flex-direction:column;gap:4px">`;
-      alertas.forEach(a=>{html+=`<li>${a}</li>`;});
-      html+=`</ul></div>`;
-    }
-    body.innerHTML=html;
-    btn.disabled=false; btn.innerHTML='✦ Atualizar Análise';
-  },400);
+function switchTab(tab){
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ai-tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('content-'+tab).classList.add('active');
 }
+
+function runAIAnalysis(){
+  const btn=document.getElementById('btnRunAnalysis');
+  btn.disabled=true; btn.textContent='⟳ Calculando...';
+  document.getElementById('btnClearAnalysis').style.display='none';
+  ['diagnostico','decisoes','cenarios','acoes'].forEach(t=>{
+    document.getElementById('content-'+t).innerHTML=`<div class="ai-loader"><div class="ai-loader-dots"><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div></div><div class="ai-loader-text">Processando dados...</div></div>`;
+  });
+  switchTab('diagnostico');
+  setTimeout(()=>{
+    try{
+      const S=calcStats();
+      renderDiagnostico(S);
+      renderDecisoes(S);
+      renderCenarios(S);
+      renderAcoes(S);
+      btn.disabled=false; btn.textContent='↺ Reanalisar';
+      document.getElementById('btnClearAnalysis').style.display='';
+    }catch(e){
+      console.error(e);
+      document.getElementById('content-diagnostico').innerHTML=`<div class="ai-placeholder"><div class="ai-placeholder-icon">⚠</div><div class="ai-placeholder-text">Erro ao processar os dados. Verifique se há dados carregados e tente novamente.<br><small>${e.message}</small></div></div>`;
+      btn.disabled=false; btn.textContent='↺ Tentar Novamente';
+    }
+  },300);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOTOR DE ANÁLISE LOCAL — 100% offline, sem API externa
+   ══════════════════════════════════════════════════════════════════ */
+function calcStats(){
+  const data=getFiltered();
+  if(!data||data.length===0) throw new Error('Nenhum dado disponível com os filtros aplicados.');
+
+  const byC=sumByCanal(data);
+  const ia=byC['I.A']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+  const op=byC['OPERACAO']||{ACIO:0,ALO:0,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0,VALOR_PGTO:0};
+  const totalAcordo=ia.ACORDO+op.ACORDO;
+  const totalValor=ia.VALOR+op.VALOR;
+
+  // Carteiras por canal
+  const byCar={};
+  data.forEach(r=>{
+    const k=r.CARTEIRA+'||'+r.CANAL;
+    if(!byCar[k]) byCar[k]={cart:r.CARTEIRA,canal:r.CANAL,emp:r.EMPRESA,CPC:0,ACORDO:0,VALOR:0,ACIO:0,ALO:0,PAGAMENTOS:0};
+    ['CPC','ACORDO','VALOR','ACIO','ALO','PAGAMENTOS'].forEach(f=>byCar[k][f]+=(r[f]||0));
+  });
+  const carRows=Object.values(byCar).map(r=>({...r,conv:pctN(r.ACORDO,r.CPC),txPgto:pctN(r.PAGAMENTOS,r.ACORDO)}));
+  const carComVolume=carRows.filter(r=>r.CPC>=5);
+  const carSorted=[...carComVolume].sort((a,b)=>b.conv-a.conv);
+  const top5=carSorted.slice(0,5);
+  const bot5=[...carComVolume].sort((a,b)=>a.conv-b.conv).slice(0,5);
+
+  // Por empresa
+  const byEmp={};
+  data.forEach(r=>{
+    const k=r.EMPRESA+'||'+r.CANAL;
+    if(!byEmp[k]) byEmp[k]={emp:r.EMPRESA,canal:r.CANAL,CPC:0,ACORDO:0,VALOR:0,PAGAMENTOS:0};
+    ['CPC','ACORDO','VALOR','PAGAMENTOS'].forEach(f=>byEmp[k][f]+=(r[f]||0));
+  });
+  const empRows=Object.values(byEmp).map(r=>({...r,conv:pctN(r.ACORDO,r.CPC),txPgto:pctN(r.PAGAMENTOS,r.ACORDO)}));
+
+  // Tendência (1ª metade vs 2ª metade do período)
+  const datas=[...new Set(data.map(r=>r.DATA_REF))].sort();
+  const half=Math.floor(datas.length/2);
+  const midDate=datas[half]||datas[0];
+  const prev=data.filter(r=>r.DATA_REF<midDate);
+  const curr=data.filter(r=>r.DATA_REF>=midDate);
+  const sumF=(arr,canal,f)=>arr.filter(r=>!canal||r.CANAL===canal).reduce((s,r)=>s+(r[f]||0),0);
+  const trendPct=(oldV,newV)=>oldV>0?((newV-oldV)/oldV*100):null;
+  const trendIA_acordo=trendPct(sumF(prev,'I.A','ACORDO'),sumF(curr,'I.A','ACORDO'));
+  const trendOP_acordo=trendPct(sumF(prev,'OPERACAO','ACORDO'),sumF(curr,'OPERACAO','ACORDO'));
+  const trendIA_conv=trendPct(pctN(sumF(prev,'I.A','ACORDO'),sumF(prev,'I.A','CPC')),pctN(sumF(curr,'I.A','ACORDO'),sumF(curr,'I.A','CPC')));
+
+  // Dia da semana
+  const dowNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const byDow={'I.A':Array(7).fill(0).map(()=>({CPC:0,ACORDO:0})),'OPERACAO':Array(7).fill(0).map(()=>({CPC:0,ACORDO:0}))};
+  data.forEach(r=>{
+    if(!r.DATA_REF) return;
+    const d=new Date(r.DATA_REF+'T12:00:00').getDay();
+    if(byDow[r.CANAL]){byDow[r.CANAL][d].CPC+=(r.CPC||0);byDow[r.CANAL][d].ACORDO+=(r.ACORDO||0);}
+  });
+  const dowConvIA=byDow['I.A'].map((v,i)=>({day:dowNames[i],conv:pctN(v.ACORDO,v.CPC),vol:v.CPC}));
+  const dowConvOP=byDow['OPERACAO'].map((v,i)=>({day:dowNames[i],conv:pctN(v.ACORDO,v.CPC),vol:v.CPC}));
+  const bestDowIA=[...dowConvIA].filter(v=>v.vol>0).sort((a,b)=>b.conv-a.conv)[0];
+  const worstDowIA=[...dowConvIA].filter(v=>v.vol>0).sort((a,b)=>a.conv-b.conv)[0];
+  const bestDowOP=[...dowConvOP].filter(v=>v.vol>0).sort((a,b)=>b.conv-a.conv)[0];
+
+  // Métricas calculadas
+  const txIACPC=pctN(ia.ACORDO,ia.CPC);
+  const txOPCPC=pctN(op.ACORDO,op.CPC);
+  const txIAALO=pctN(ia.ALO,ia.ACIO);
+  const txOPALO=pctN(op.ALO,op.ACIO);
+  const txIAPgto=pctN(ia.PAGAMENTOS,ia.ACORDO);
+  const txOPPgto=pctN(op.PAGAMENTOS,op.ACORDO);
+  const ticketIA=ia.ACORDO>0?ia.VALOR/ia.ACORDO:0;
+  const ticketOP=op.ACORDO>0?op.VALOR/op.ACORDO:0;
+  const pctIA=pctN(ia.ACORDO,totalAcordo);
+  const pctOP=pctN(op.ACORDO,totalAcordo);
+  const valorPagoIA=ia.VALOR_PGTO||0;
+  const valorPagoOP=op.VALOR_PGTO||0;
+  const eficienciaIA=pctN(valorPagoIA,ia.VALOR); // % do valor acordado que foi efetivamente pago
+  const eficienciaOP=pctN(valorPagoOP,op.VALOR);
+  const cpcPorAcio_IA=pctN(ia.CPC,ia.ACIO);
+  const cpcPorAcio_OP=pctN(op.CPC,op.ACIO);
+  const totalPagamentos=ia.PAGAMENTOS+op.PAGAMENTOS;
+  const txPgtoTotal=pctN(totalPagamentos,totalAcordo);
+  const valorPagoTotal=valorPagoIA+valorPagoOP;
+  const eficienciaGeral=pctN(valorPagoTotal,totalValor);
+
+  return {
+    data,ia,op,totalAcordo,totalValor,
+    txIACPC,txOPCPC,txIAALO,txOPALO,txIAPgto,txOPPgto,
+    ticketIA,ticketOP,pctIA,pctOP,
+    valorPagoIA,valorPagoOP,eficienciaIA,eficienciaOP,
+    cpcPorAcio_IA,cpcPorAcio_OP,
+    totalPagamentos,txPgtoTotal,valorPagoTotal,eficienciaGeral,
+    top5,bot5,carRows,carComVolume,empRows,
+    trendIA_acordo,trendOP_acordo,trendIA_conv,
+    bestDowIA,worstDowIA,bestDowOP,
+    datas,half,midDate,
+    periodoInicio:datas[0]||'—',periodoFim:datas[datas.length-1]||'—',diasTotal:datas.length,
+  };
+}
+
+/* ── DIAGNÓSTICO ─────────────────────────────────────────────────── */
+function renderDiagnostico(S){
+  const {ia,op,txIACPC,txOPCPC,txIAALO,txOPALO,txIAPgto,txOPPgto,
+         ticketIA,ticketOP,pctIA,pctOP,totalAcordo,totalValor,
+         eficienciaIA,eficienciaOP,eficienciaGeral,valorPagoTotal,
+         cpcPorAcio_IA,cpcPorAcio_OP,trendIA_acordo,trendIA_conv,
+         bestDowIA,worstDowIA,bestDowOP,bot5,top5,empRows,periodoInicio,periodoFim,diasTotal}=S;
+
+  // --- Diagnósticos contextuais em linguagem natural ---
+  const paragrafos=[];
+
+  // 1. Visão geral
+  const melhorConv=txIACPC>txOPCPC?'IA':'Operação';
+  const difConv=Math.abs(txIACPC-txOPCPC).toFixed(1);
+  paragrafos.push(`<b>Visão Geral do Período (${periodoInicio} a ${periodoFim} — ${diasTotal} dias):</b> Foram firmados <b>${fmt(totalAcordo)}</b> acordos no total, gerando <b>${fmtCur(totalValor)}</b> em valor acordado. O canal <b>${melhorConv}</b> apresentou melhor taxa de conversão CPC→Acordo (${melhorConv==='IA'?txIACPC.toFixed(1):txOPCPC.toFixed(1)}% vs ${melhorConv==='IA'?txOPCPC.toFixed(1):txIACPC.toFixed(1)}%), uma diferença de <b>${difConv} p.p.</b> A IA respondeu por <b>${pctIA.toFixed(1)}%</b> dos acordos e a Operação por <b>${pctOP.toFixed(1)}%</b>.`);
+
+  // 2. Funil — onde estão as perdas
+  const gargaloIA=txIAALO<30?'baixa taxa de atendimento (ALO)':txIACPC<10?'baixa conversão no CPC':'funil relativamente saudável';
+  const gargaloOP=txOPALO<40?'baixa taxa de atendimento (ALO)':txOPCPC<15?'baixa conversão no CPC':'funil relativamente eficiente';
+  paragrafos.push(`<b>Análise do Funil:</b> O maior gargalo da IA está na <b>${gargaloIA}</b> — de cada 100 acionamentos, ${txIAALO.toFixed(0)} viram ALO, ${cpcPorAcio_IA.toFixed(0)} viram CPC e apenas ${pctN(ia.ACORDO,ia.ACIO).toFixed(1)} resultam em acordo. Na Operação, o maior gargalo é <b>${gargaloOP}</b> — taxa ALO de ${txOPALO.toFixed(1)}%, CPC de ${cpcPorAcio_OP.toFixed(1)}% sobre acionamentos e conversão final de ${pctN(op.ACORDO,op.ACIO).toFixed(1)}%.`);
+
+  // 3. Qualidade dos acordos — ticket e pagamento
+  const qualTicket=ticketIA>ticketOP?`IA fechando acordos de maior valor (+${((ticketIA/Math.max(ticketOP,1)-1)*100).toFixed(0)}% vs Operação)`:`Operação fechando acordos de maior valor (+${((ticketOP/Math.max(ticketIA,1)-1)*100).toFixed(0)}% vs IA)`;
+  const qualPgto=txIAPgto>txOPPgto?'IA com melhor taxa de pagamento':'Operação com melhor taxa de pagamento';
+  const alertaPgtoIA=txIAPgto<30?' — atenção: menos de 1 em 3 acordos da IA estão sendo pagos, sugerindo possíveis acordos superestimados ou inadimplência recorrente':'';
+  paragrafos.push(`<b>Qualidade dos Acordos:</b> ${qualTicket}. Ticket médio IA: <b>${fmtCur(ticketIA)}</b> | Operação: <b>${fmtCur(ticketOP)}</b>. No quesito pagamento, <b>${qualPgto}</b> (IA: ${txIAPgto.toFixed(1)}% | Op: ${txOPPgto.toFixed(1)}%)${alertaPgtoIA}. O valor efetivamente recuperado representa <b>${eficienciaGeral.toFixed(1)}%</b> do total acordado — ${eficienciaGeral>=50?'índice saudável de recuperação real':'há espaço relevante para melhoria na conversão de acordos em pagamentos'}.`);
+
+  // 4. Sazonalidade
+  if(bestDowIA&&bestDowOP){
+    const sazon=bestDowIA.day===bestDowOP.day?`ambos os canais performam melhor na <b>${bestDowIA.day}</b>`:`a IA performa melhor na <b>${bestDowIA.day}</b> (${bestDowIA.conv.toFixed(1)}% conv.) e a Operação na <b>${bestDowOP.day}</b> (${bestDowOP.conv.toFixed(1)}% conv.)`;
+    const pior=worstDowIA?` O pior dia para a IA é <b>${worstDowIA.day}</b> (${worstDowIA.conv.toFixed(1)}% conv.), sugerindo reduzir ou reconfigurar discagem nesse dia.`:'';
+    paragrafos.push(`<b>Padrão Semanal:</b> Por dia da semana, ${sazon}.${pior} Concentrar esforços nos dias de pico pode aumentar a eficiência geral da operação sem necessidade de mais volume.`);
+  }
+
+  // 5. Carteiras críticas
+  if(bot5.length>0){
+    const criticas=bot5.slice(0,3).map(r=>`${r.cart} (${r.canal}, ${r.conv.toFixed(1)}%)`).join(', ');
+    const melhores=top5.slice(0,3).map(r=>`${r.cart} (${r.canal}, ${r.conv.toFixed(1)}%)`).join(', ');
+    paragrafos.push(`<b>Carteiras Críticas:</b> As carteiras com menor conversão (mínimo 5 CPC) são: <b>${criticas}</b>. Estas carteiras podem estar com perfil de devedor mais difícil, abordagem inadequada ou timing errado. Em contraste, as melhores carteiras são <b>${melhores}</b> — o modelo de sucesso dessas carteiras deve ser mapeado e replicado.`);
+  }
+
+  // 6. Tendência
+  if(trendIA_acordo!==null){
+    const dirAcordo=trendIA_acordo>=0?`crescendo ${trendIA_acordo.toFixed(1)}%`:`caindo ${Math.abs(trendIA_acordo).toFixed(1)}%`;
+    const dirConv=trendIA_conv!==null?(trendIA_conv>=0?`conversão melhorando ${trendIA_conv.toFixed(1)}p.p.`:`conversão caindo ${Math.abs(trendIA_conv).toFixed(1)}p.p.`):'';
+    paragrafos.push(`<b>Tendência da IA no Período:</b> Comparando a primeira metade vs segunda metade do intervalo analisado, o volume de acordos da IA está <b>${dirAcordo}</b>${dirConv?` com ${dirConv}`:''}. ${trendIA_acordo<-10?'Queda significativa — investigar mudanças na base ou na configuração da IA.':trendIA_acordo>10?'Crescimento relevante — a IA está ganhando eficiência.':'Estabilidade operacional no período.'}`);
+  }
+
+  // Montagem HTML
+  let html=`<div class="ai-streaming">`;
+  // Mini KPIs no topo
+  html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">`;
+  [{l:'Conv IA',v:txIACPC.toFixed(1)+'%',c:'var(--ia)',s:'CPC→Acordo',ok:txIACPC>=12},
+   {l:'Conv Operação',v:txOPCPC.toFixed(1)+'%',c:'var(--op)',s:'CPC→Acordo',ok:txOPCPC>=15},
+   {l:'Tx Pgto IA',v:txIAPgto.toFixed(1)+'%',c:'var(--ia)',s:'acordos pagos',ok:txIAPgto>=40},
+   {l:'Eficiência Geral',v:eficienciaGeral.toFixed(1)+'%',c:'var(--orange)',s:'valor recuperado',ok:eficienciaGeral>=50},
+  ].forEach(m=>{
+    html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;border-top:2px solid ${m.ok?'var(--green)':'var(--red)'}">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${m.l}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:${m.c}">${m.v}</div>
+      <div style="font-size:10px;color:var(--muted)">${m.s} ${m.ok?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">⚠</span>'}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // Parágrafos
+  paragrafos.forEach(p=>{
+    html+=`<p style="margin-bottom:13px;line-height:1.75;color:var(--text);font-size:13px">${p}</p>`;
+  });
+  html+=`</div>`;
+  document.getElementById('content-diagnostico').innerHTML=html;
+}
+
+/* ── TOMADA DE DECISÃO ───────────────────────────────────────────── */
+function renderDecisoes(S){
+  const {txIACPC,txOPCPC,txIAPgto,txOPPgto,ticketIA,ticketOP,
+         pctIA,eficienciaIA,eficienciaOP,trendIA_acordo,
+         bot5,top5,bestDowIA,worstDowIA,bestDowOP,ia,op,
+         txIAALO,txOPALO,cpcPorAcio_IA,cpcPorAcio_OP,totalAcordo}=S;
+
+  // Biblioteca de regras de decisão — avaliadas contra os dados reais
+  const regras=[
+    // URGENTES
+    {cond:txIACPC<8,tipo:'urgente',titulo:'Conversão IA em nível crítico',
+     desc:`Taxa CPC→Acordo da IA em ${txIACPC.toFixed(1)}% — abaixo do mínimo aceitável de 8%. Cada 100 contatos produtivos geram menos de 8 acordos, comprometendo o ROI do canal.`,
+     acao:'Revisar imediatamente o script da IA, janelas de horário e perfil de carteiras atribuídas ao robô. Meta: atingir 12% em 15 dias.'},
+    {cond:txIAPgto<25,tipo:'urgente',titulo:'Taxa de pagamento da IA alarmante',
+     desc:`Apenas ${txIAPgto.toFixed(1)}% dos acordos da IA estão sendo pagos. Alta inadimplência pós-acordo sugere que os clientes estão aceitando acordos sem intenção real de pagar.`,
+     acao:'Revisar as condições de parcelamento ofertadas pela IA e adicionar filtro de perfil de propensão a pagamento antes do acionamento.'},
+    {cond:txOPCPC<10,tipo:'urgente',titulo:'Operação humana com baixo fechamento',
+     desc:`Conversão da Operação em ${txOPCPC.toFixed(1)}%, indicando falha na abordagem ou treinamento insuficiente de negociação para as carteiras atuais.`,
+     acao:'Aplicar treinamento focado em técnicas de fechamento e escuta ativa. Implementar monitoria diária de chamadas com menor conversão.'},
+    {cond:txIAALO<25,tipo:'urgente',titulo:'Taxa ALO da IA muito baixa',
+     desc:`Apenas ${txIAALO.toFixed(1)}% dos acionamentos da IA resultam em atendimento. O robô está discando para telefones inválidos ou horários inadequados.`,
+     acao:'Higienizar base de telefones da IA com validador ativo. Testar janelas de horário diferentes (ex: 8h-10h e 17h-19h).'},
+
+    // IMPORTANTES
+    {cond:txIACPC>=8&&txIACPC<12,tipo:'importante',titulo:'Conversão IA abaixo do potencial',
+     desc:`Conversão de ${txIACPC.toFixed(1)}% na IA — operacional, mas com espaço relevante de melhoria. Ganhar 3p.p. aqui significa ${Math.round(ia.CPC*0.03)} acordos adicionais com o mesmo volume.`,
+     acao:'Realizar A/B test com variações de script da IA. Testar tom mais empático e ofertas de desconto escalonado.'},
+    {cond:txOPCPC>=10&&txOPCPC<18,tipo:'importante',titulo:'Operação pode ganhar eficiência',
+     desc:`Com conversão de ${txOPCPC.toFixed(1)}%, a Operação está funcional mas longe do benchmark de mercado (20-25%). Há potencial para +${Math.round(op.CPC*0.05)} acordos mensais.`,
+     acao:'Criar ranking de operadores por conversão. Parear os melhores com os mais fracos para repasse de boas práticas.'},
+    {cond:ticketIA<ticketOP*0.75,tipo:'importante',titulo:'IA fechando acordos de baixo valor',
+     desc:`Ticket médio da IA (${fmtCur(ticketIA)}) é ${((1-ticketIA/ticketOP)*100).toFixed(0)}% menor que o da Operação (${fmtCur(ticketOP)}). A IA pode estar aceitando propostas abaixo do ideal.`,
+     acao:'Revisar piso mínimo de acordo na configuração da IA. Testar estratégia de contra-oferta antes de aceitar propostas abaixo do valor sugerido.'},
+    {cond:pctIA<15,tipo:'importante',titulo:'Participação da IA muito baixa',
+     desc:`IA respondendo por apenas ${pctIA.toFixed(1)}% dos acordos. O canal está subutilizado e pode escalar sem custo proporcional ao humano.`,
+     acao:'Ampliar cobertura de carteiras e horários da IA. Priorizar IA para carteiras com dívidas menores e perfil digital.'},
+    {cond:eficienciaIA<eficienciaOP-15,tipo:'importante',titulo:'IA com menor eficiência de recuperação',
+     desc:`Apenas ${eficienciaIA.toFixed(1)}% do valor acordado pela IA é efetivamente pago, contra ${eficienciaOP.toFixed(1)}% da Operação. Diferença de ${(eficienciaOP-eficienciaIA).toFixed(0)}p.p.`,
+     acao:'Analisar perfil das carteiras atribuídas à IA e redirecionar para perfis com maior histórico de pagamento.'},
+
+    // OPORTUNIDADES
+    {cond:top5.length>0&&top5[0].conv>txIACPC+10,tipo:'oportunidade',titulo:'Carteiras de alto desempenho — replicar modelo',
+     desc:`A carteira "${top5[0].cart}" (${top5[0].canal}) tem conversão de ${top5[0].conv.toFixed(1)}%, muito acima da média. O modelo de abordagem pode ser replicado.`,
+     acao:`Mapear as características da carteira "${top5[0].cart}" (tamanho, perfil, script, horário) e aplicar padrão semelhante nas demais.`},
+    {cond:bestDowIA&&bestDowOP&&bestDowIA.conv>0,tipo:'oportunidade',titulo:'Concentrar volume nos dias de pico',
+     desc:`A IA converte ${bestDowIA.conv.toFixed(1)}% na ${bestDowIA.day} e a Operação ${bestDowOP.conv.toFixed(1)}% na ${bestDowOP.day}. Aumentar volume nesses dias gera mais acordos sem custo adicional.`,
+     acao:`Redistribuir agenda de discagem para priorizar ${bestDowIA.day} (IA) e ${bestDowOP.day} (Operação). Reduzir volume nos dias de baixa performance.`},
+    {cond:worstDowIA&&worstDowIA.conv<txIACPC*0.5,tipo:'oportunidade',titulo:'Eliminar discagem ineficiente por dia',
+     desc:`A IA tem apenas ${worstDowIA.conv.toFixed(1)}% de conversão na ${worstDowIA.day} — menos da metade da média. Reduzir volume nesse dia libera capacidade para dias mais produtivos.`,
+     acao:`Suspender ou reduzir em 60% o volume da IA na ${worstDowIA.day}. Redirecionar esses contatos para os dias de melhor performance.`},
+    {cond:txIACPC>txOPCPC+5,tipo:'oportunidade',titulo:'IA superando humanos — ampliar escala',
+     desc:`IA com conversão ${(txIACPC-txOPCPC).toFixed(1)}p.p. acima da Operação humana. Aumentar participação da IA é estratégico para reduzir custo por acordo.`,
+     acao:'Aumentar volume de acionamentos da IA em 30% nas carteiras onde já performa bem. Avaliar custo por acordo x custo humano para embasar expansão.'},
+
+    // ESTRATÉGICOS
+    {cond:txOPCPC>txIACPC+5,tipo:'estrategico',titulo:'Humanos superam IA — revisar segmentação',
+     desc:`Operação com conversão ${(txOPCPC-txIACPC).toFixed(1)}p.p. acima da IA. Certas carteiras ou perfis podem ser mais adequados para negociação humana.`,
+     acao:'Criar matriz de segmentação: carteiras de alto valor e complexidade para Operação, carteiras de baixo valor e alta escala para IA.'},
+    {cond:bot5.length>=3,tipo:'estrategico',titulo:'Revisão estratégica de carteiras críticas',
+     desc:`${bot5.length} carteiras com conversão abaixo de ${bot5[bot5.length-1]?.conv.toFixed(1)||0}%. Manter essas carteiras ativas pode estar consumindo volume de discagem sem retorno.`,
+     acao:'Realizar análise de viabilidade das carteiras de baixo desempenho. Considerar pausa temporária, troca de canal ou reprecificação das propostas.'},
+    {cond:eficienciaIA<40||eficienciaOP<40,tipo:'estrategico',titulo:'Estratégia de follow-up pós-acordo',
+     desc:`Taxa de conversão de acordos em pagamentos abaixo de 40% em ${eficienciaIA<40&&eficienciaOP<40?'ambos os canais':eficienciaIA<40?'IA':'Operação'}. O acordo está sendo firmado mas não confirmado financeiramente.`,
+     acao:'Implementar régua de follow-up pós-acordo: SMS + ligação 24h antes do vencimento. Medir impacto na taxa de pagamento em 30 dias.'},
+    {cond:totalAcordo>0,tipo:'estrategico',titulo:'Modelo preditivo de propensão ao acordo',
+     desc:'Com o volume de dados acumulado, é possível treinar um modelo de scoring para priorizar os devedores com maior probabilidade de firmar e honrar acordos.',
+     acao:'Solicitar exportação histórica dos dados (12+ meses) para time de dados. Criar score de propensão por CPF para priorização de discagem.'},
+  ];
+
+  // Selecionar as mais relevantes (máx 8, priorizando urgentes)
+  const selecionadas=regras.filter(r=>r.cond);
+  const urgentes=selecionadas.filter(r=>r.tipo==='urgente').slice(0,3);
+  const importantes=selecionadas.filter(r=>r.tipo==='importante').slice(0,2);
+  const oportunidades=selecionadas.filter(r=>r.tipo==='oportunidade').slice(0,2);
+  const estrategicos=selecionadas.filter(r=>r.tipo==='estrategico').slice(0,2);
+  const final=[...urgentes,...importantes,...oportunidades,...estrategicos].slice(0,9);
+
+  // Se nenhuma regra crítica disparou, adicionar cards positivos
+  if(final.length<3){
+    final.push({tipo:'oportunidade',titulo:'Operação com indicadores saudáveis',
+      desc:'Os principais indicadores estão dentro dos parâmetros aceitáveis. O foco agora deve ser otimização incremental.',
+      acao:'Definir metas de crescimento de 10-15% em acordos para o próximo mês mantendo a taxa de pagamento atual.'});
+  }
+
+  const tLabel={urgente:'🔴 URGENTE',importante:'🟡 IMPORTANTE',oportunidade:'🟢 OPORTUNIDADE',estrategico:'🟣 ESTRATÉGICO'};
+  let html=`<div class="ai-decision-cards">`;
+  final.forEach(c=>{
+    html+=`<div class="ai-decision-card ${c.tipo}">
+      <div class="ai-dc-badge ${c.tipo}">${tLabel[c.tipo]}</div>
+      <div class="ai-dc-title">${c.titulo}</div>
+      <div class="ai-dc-desc">${c.desc}</div>
+      <div class="ai-dc-action">→ ${c.acao}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('content-decisoes').innerHTML=html;
+}
+
+/* ── CENÁRIOS ────────────────────────────────────────────────────── */
+function renderCenarios(S){
+  const {ia,op,txIACPC,txOPCPC,txIAPgto,txOPPgto,totalAcordo,totalValor,
+         ticketIA,ticketOP,diasTotal,trendIA_acordo,trendOP_acordo}=S;
+
+  // Base: média diária atual
+  const mediaDiariaAcordos=diasTotal>0?totalAcordo/diasTotal:0;
+  const mediaDiariaValor=diasTotal>0?totalValor/diasTotal:0;
+  const projecao30=(v,mult)=>Math.round(v*30*mult);
+  const projecaoValor30=(v,mult)=>v*30*mult;
+
+  // Calcular com lógica contextual
+  const base30=projecao30(mediaDiariaAcordos,1);
+  const baseValor30=projecaoValor30(mediaDiariaValor,1);
+
+  const cenarios=[
+    {label:'otimista',icone:'📈',
+     valor:fmtCur(baseValor30*1.25),acordos:fmt(Math.round(base30*1.25)),
+     condicao:`Conv. IA ≥ ${Math.min(txIACPC+4,35).toFixed(0)}% e Conv. Op. ≥ ${Math.min(txOPCPC+4,30).toFixed(0)}%. Discagem nos melhores dias concentrada. Taxa de pagamento mantida.`,
+     acao:'Otimizar script da IA, concentrar volume nos dias de pico, escalar carteiras com melhor conversão.'},
+    {label:'realista',icone:'📊',
+     valor:fmtCur(baseValor30*1.05),acordos:fmt(Math.round(base30*1.05)),
+     condicao:`Manutenção dos indicadores atuais com melhorias pontuais. Conv. IA ${txIACPC.toFixed(1)}%→${Math.min(txIACPC+2,30).toFixed(1)}%, Op. ${txOPCPC.toFixed(1)}%→${Math.min(txOPCPC+1,25).toFixed(1)}%.`,
+     acao:'Monitorar diariamente KPIs críticos, aplicar correções táticas semanais e manter equipe treinada.'},
+    {label:'pessimista',icone:'📉',
+     valor:fmtCur(baseValor30*0.80),acordos:fmt(Math.round(base30*0.80)),
+     condicao:`Queda de performance por higienização de base, aumento de inadimplência ou desmotivação da equipe sem intervenção.`,
+     acao:'Monitorar early warnings: queda de >15% em qualquer KPI aciona plano de contingência imediato.'},
+    {label:'disruptivo',icone:'🚀',
+     valor:fmtCur(baseValor30*1.55),acordos:fmt(Math.round(base30*1.55)),
+     condicao:`IA com score de propensão implementado + expansão de cobertura de carteiras em 100% + follow-up automatizado pós-acordo.`,
+     acao:'Projeto de 60 dias: modelagem preditiva + integração de follow-up automático + revisão completa de segmentação IA vs Humano.'},
+  ];
+
+  const sColors={otimista:'#3fb950',realista:'#2e7de9',pessimista:'#f85149',disruptivo:'#a78bfa'};
+  let html=`<div style="margin-bottom:12px;font-size:12px;color:var(--muted)">Projeções baseadas na média diária do período filtrado (${fmt(Math.round(mediaDiariaAcordos))} acordos/dia · ${fmtCur(mediaDiariaValor)}/dia)</div>`;
+  html+=`<div class="ai-scenario-grid">`;
+  cenarios.forEach(c=>{
+    html+=`<div class="ai-scenario" style="border-top:2px solid ${sColors[c.label]}">
+      <div class="ai-scenario-label ${c.label}">${c.icone} ${c.label.toUpperCase()}</div>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin:6px 0 10px">
+        <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Valor Acordado</div><div class="ai-scenario-value" style="color:${sColors[c.label]}">${c.valor}</div></div>
+        <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Acordos</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--text)">${c.acordos}</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Condição</div>
+      <div class="ai-scenario-desc">${c.condicao}</div>
+      <div style="margin-top:8px;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Como atingir</div>
+      <div class="ai-scenario-desc">${c.acao}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('content-cenarios').innerHTML=html;
+}
+
+/* ── PLANO DE AÇÃO ───────────────────────────────────────────────── */
+function renderAcoes(S){
+  const {txIACPC,txOPCPC,txIAALO,txOPALO,txIAPgto,txOPPgto,
+         pctIA,ticketIA,ticketOP,eficienciaIA,eficienciaOP,
+         bestDowIA,worstDowIA,bot5,top5,trendIA_acordo}=S;
+
+  // Plano gerado dinamicamente com base nos problemas reais detectados
+  const plano=[];
+
+  // P1 — Ações imediatas (disparadas por condições críticas)
+  if(txIACPC<10) plano.push({p:'P1',resp:'GESTOR_IA',prazo:'Imediato (hoje)',
+    acao:`Revisar configuração da IA: score de abordagem, janela de horário e script de oferta. Meta: conv. ${(txIACPC+4).toFixed(0)}% em 10 dias. (Atual: ${txIACPC.toFixed(1)}%)`});
+  if(txIAPgto<30) plano.push({p:'P1',resp:'GESTOR_IA',prazo:'Imediato (48h)',
+    acao:`Mapear os acordos da IA firmados nos últimos 15 dias que não foram pagos. Identificar padrão: carteira, valor, horário. (Taxa atual: ${txIAPgto.toFixed(1)}%)`});
+  if(txOPCPC<12) plano.push({p:'P1',resp:'GESTOR_OP',prazo:'Imediato (hoje)',
+    acao:`Escutar 10 chamadas de menor conversão de cada turno. Criar lista de objeções mais frequentes e treinar resposta. (Conv. atual: ${txOPCPC.toFixed(1)}%)`});
+  if(txIAALO<30) plano.push({p:'P1',resp:'GESTOR_IA',prazo:'Imediato (48h)',
+    acao:`Higienizar base de telefones da IA com validação ativa. Testar janela 8h-10h e 17h-20h nos próximos 3 dias. (ALO atual: ${txIAALO.toFixed(1)}%)`});
+
+  // P2 — Alta prioridade (semana)
+  if(bot5.length>0) plano.push({p:'P2',resp:'SUPERVISOR',prazo:'Esta semana',
+    acao:`Revisão das ${bot5.length} carteiras com menor conversão: avaliar pausa ou troca de canal. Apresentar recomendação em reunião de equipe.`});
+  if(top5.length>0) plano.push({p:'P2',resp:'SUPERVISOR',prazo:'Esta semana',
+    acao:`Documentar o modelo de sucesso da carteira "${top5[0].cart}" (${top5[0].conv.toFixed(1)}% conv): horário, script, perfil. Aplicar em carteiras similares.`});
+  if(bestDowIA) plano.push({p:'P2',resp:'GESTOR_IA',prazo:'Esta semana',
+    acao:`Redistribuir volume da IA: aumentar 40% de discagem na ${bestDowIA.day}${worstDowIA?` e reduzir 60% na ${worstDowIA.day}`:''}.`});
+  if(ticketIA<ticketOP*0.8) plano.push({p:'P2',resp:'GESTOR_IA',prazo:'Esta semana',
+    acao:`Revisar piso mínimo de aceitação na IA. Configurar recusa automática para propostas abaixo de ${fmtCur(ticketIA*1.2)}.`});
+  if(pctIA<20) plano.push({p:'P2',resp:'GESTOR_IA',prazo:'Esta semana',
+    acao:`Ampliar cobertura da IA: incluir 2 novas carteiras de perfil digital/baixo valor. Meta: IA acima de 25% dos acordos.`});
+
+  // P3 — Médio prazo (quinzena)
+  plano.push({p:'P3',resp:'SUPERVISOR',prazo:'Quinzena',
+    acao:`Implementar dashboard de monitoria diária com alertas automáticos quando conversão cair >2p.p. por 3 dias seguidos.`});
+  if(eficienciaIA<50||eficienciaOP<50) plano.push({p:'P3',resp:'SUPERVISOR',prazo:'Quinzena',
+    acao:`Criar régua de follow-up pós-acordo: SMS D-1 + ligação D-1 do vencimento. Meta: aumentar taxa de pagamento em 8p.p.`});
+  plano.push({p:'P3',resp:'DIRETORIA',prazo:'Quinzena',
+    acao:`Avaliar ROI do canal IA vs Operação: custo por acordo firmado e custo por R$ recuperado. Definir mix estratégico ideal para o próximo trimestre.`});
+  plano.push({p:'P3',resp:'DIRETORIA',prazo:'Quinzena',
+    acao:`Solicitar ao time de dados exportação histórica (12 meses) para construção de score de propensão a acordo por CPF.`});
+
+  // Garantir ao menos 6 ações
+  while(plano.length<6){
+    plano.push({p:'P3',resp:'SUPERVISOR',prazo:'Quinzena',
+      acao:'Realizar reunião de alinhamento entre equipes IA e Operação para compartilhar boas práticas identificadas no período.'});
+  }
+
+  const pColor={P1:'#f85149',P2:'#d29922',P3:'#3fb950'};
+  const rColor={GESTOR_IA:'#00c8ff',GESTOR_OP:'#00e5a0',SUPERVISOR:'#a78bfa',DIRETORIA:'#d29922'};
+  const pDesc={P1:'Crítico · Imediato',P2:'Alta · Esta semana',P3:'Média · Quinzena'};
+
+  // Ordenar: P1 primeiro
+  const ordenado=[...plano].sort((a,b)=>a.p.localeCompare(b.p));
+
+  let html=`<div style="display:flex;flex-direction:column;gap:8px">`;
+  ordenado.slice(0,10).forEach((a,i)=>{
+    html+=`<div style="display:flex;align-items:flex-start;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;border-left:3px solid ${pColor[a.p]}">
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:center;min-width:80px;padding-top:2px">
+        <span style="font-size:13px;font-weight:800;color:${pColor[a.p]};font-family:'Barlow Condensed',sans-serif">${a.p}</span>
+        <span style="font-size:8px;color:${pColor[a.p]};opacity:.7;text-align:center;line-height:1.3">${pDesc[a.p]}</span>
+        <span style="font-size:8px;font-weight:700;color:${rColor[a.resp]||'#8b949e'};background:${rColor[a.resp]||'#8b949e'}18;padding:2px 6px;border-radius:3px;margin-top:2px;text-align:center">${a.resp.replace('_',' ')}</span>
+        <span style="font-size:8px;color:var(--muted);text-align:center;margin-top:2px">${a.prazo}</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px;flex:1">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--border);flex-shrink:0">${String(i+1).padStart(2,'0')}</span>
+        <div style="font-size:13px;color:var(--text);line-height:1.6">${a.acao}</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('content-acoes').innerHTML=html;
+}
+
+function generateAnalysis(){runAIAnalysis();}
+
 
 // ── RENDER ────────────────────────────────────────────────────────
 function render(){
