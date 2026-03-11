@@ -31,10 +31,25 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 .upload-label{font-size:11px;color:var(--muted);}
 
 .filters{display:flex;gap:12px;padding:12px 28px;background:var(--surface2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
-.filter-group{display:flex;flex-direction:column;gap:3px;}
+.filter-group{display:flex;flex-direction:column;gap:3px;position:relative;}
 .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
-.filter-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:5px;font-family:'Barlow',sans-serif;font-size:12px;cursor:pointer;min-width:150px;}
+.filter-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:5px;font-family:'Barlow',sans-serif;font-size:12px;cursor:pointer;min-width:130px;}
 .filter-select:focus{outline:none;border-color:var(--accent);}
+
+/* Multiselect dropdown */
+.ms-wrapper{position:relative;min-width:160px;}
+.ms-trigger{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 28px 5px 10px;border-radius:5px;font-family:'Barlow',sans-serif;font-size:12px;cursor:pointer;min-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%;position:relative;}
+.ms-trigger::after{content:'▾';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);}
+.ms-trigger:focus{outline:none;border-color:var(--accent);}
+.ms-dropdown{display:none;position:absolute;top:calc(100% + 3px);left:0;z-index:999;background:var(--surface);border:1px solid var(--accent);border-radius:6px;min-width:200px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.ms-dropdown.open{display:block;}
+.ms-actions{display:flex;gap:6px;padding:7px 10px;border-bottom:1px solid var(--border);}
+.ms-action-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;}
+.ms-action-btn:hover{color:var(--text);border-color:var(--accent);}
+.ms-option{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:12px;transition:background .1s;}
+.ms-option:hover{background:var(--surface2);}
+.ms-option input[type=checkbox]{accent-color:var(--accent);width:13px;height:13px;cursor:pointer;}
+.ms-option label{cursor:pointer;user-select:none;flex:1;}
 
 .main{padding:20px 28px;display:flex;flex-direction:column;gap:24px;}
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
@@ -129,15 +144,42 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 <div class="filters">
   <div class="filter-group">
     <span class="filter-label">Empresa</span>
-    <select class="filter-select" id="filterEmpresa" onchange="render()"><option value="ALL">Todas</option></select>
+    <div class="ms-wrapper" id="msWrapEmpresa">
+      <button class="ms-trigger" id="msTriggerEmpresa" onclick="toggleMs('Empresa')">Todas</button>
+      <div class="ms-dropdown" id="msDropEmpresa">
+        <div class="ms-actions">
+          <button class="ms-action-btn" onclick="selectAll('Empresa')">Tudo</button>
+          <button class="ms-action-btn" onclick="clearAll('Empresa')">Limpar</button>
+        </div>
+        <div id="msListEmpresa"></div>
+      </div>
+    </div>
   </div>
   <div class="filter-group">
     <span class="filter-label">Carteira</span>
-    <select class="filter-select" id="filterCarteira" onchange="render()"><option value="ALL">Todas</option></select>
+    <div class="ms-wrapper" id="msWrapCarteira">
+      <button class="ms-trigger" id="msTriggerCarteira" onclick="toggleMs('Carteira')">Todas</button>
+      <div class="ms-dropdown" id="msDropCarteira">
+        <div class="ms-actions">
+          <button class="ms-action-btn" onclick="selectAll('Carteira')">Tudo</button>
+          <button class="ms-action-btn" onclick="clearAll('Carteira')">Limpar</button>
+        </div>
+        <div id="msListCarteira"></div>
+      </div>
+    </div>
   </div>
   <div class="filter-group">
     <span class="filter-label">Canal</span>
-    <select class="filter-select" id="filterCanal" onchange="render()"><option value="ALL">Todos</option></select>
+    <div class="ms-wrapper" id="msWrapCanal">
+      <button class="ms-trigger" id="msTriggerCanal" onclick="toggleMs('Canal')">Todos</button>
+      <div class="ms-dropdown" id="msDropCanal">
+        <div class="ms-actions">
+          <button class="ms-action-btn" onclick="selectAll('Canal')">Tudo</button>
+          <button class="ms-action-btn" onclick="clearAll('Canal')">Limpar</button>
+        </div>
+        <div id="msListCanal"></div>
+      </div>
+    </div>
   </div>
   <div class="filter-group">
     <span class="filter-label">Data Início</span>
@@ -299,36 +341,121 @@ function handleUpload(e) {
   reader.readAsArrayBuffer(file);
 }
 
-function getUnique(key) {
-  return [...new Set(allData.map(r=>r[key]).filter(v=>v&&v!=='NULL'))].sort();
+// ── MULTISELECT STATE ────────────────────────────────────────────
+const msState = { Empresa: new Set(), Carteira: new Set(), Canal: new Set() };
+
+function getUniqueFiltered(key, filterByEmpresa=false) {
+  let src = allData;
+  if(filterByEmpresa && key==='CARTEIRA' && msState.Empresa.size > 0) {
+    src = allData.filter(r => msState.Empresa.has(r.EMPRESA));
+  }
+  return [...new Set(src.map(r=>r[key]).filter(v=>v&&v!=='NULL'))].sort();
 }
 
+function buildMsList(name, vals) {
+  const list = document.getElementById('msList'+name);
+  const stateKey = name;
+  const dataKey = name.toUpperCase();
+  list.innerHTML = vals.map(v => `
+    <div class="ms-option">
+      <input type="checkbox" id="ms_${name}_${v}" value="${v}" ${msState[stateKey].has(v)?'checked':''}
+        onchange="onMsChange('${name}','${v}',this.checked)">
+      <label for="ms_${name}_${v}">${v}</label>
+    </div>`).join('');
+}
+
+function updateMsTrigger(name) {
+  const sel = msState[name];
+  const trigger = document.getElementById('msTrigger'+name);
+  if(sel.size===0) {
+    trigger.textContent = name==='Canal'?'Todos':'Todas';
+  } else if(sel.size===1) {
+    trigger.textContent = [...sel][0];
+  } else {
+    trigger.textContent = sel.size+' selecionados';
+  }
+  // add arrow back via CSS ::after — need a span trick
+  trigger.innerHTML = trigger.textContent;
+}
+
+function onMsChange(name, val, checked) {
+  if(checked) msState[name].add(val);
+  else msState[name].delete(val);
+  updateMsTrigger(name);
+  // If empresa changed, rebuild carteiras
+  if(name==='Empresa') {
+    const cartVals = getUniqueFiltered('CARTEIRA', true);
+    // remove carteiras not in new set
+    for(const c of [...msState.Carteira]) {
+      if(!cartVals.includes(c)) msState.Carteira.delete(c);
+    }
+    buildMsList('Carteira', cartVals);
+    updateMsTrigger('Carteira');
+  }
+  render();
+}
+
+function selectAll(name) {
+  const dataKey = name.toUpperCase();
+  const vals = getUniqueFiltered(dataKey, name==='Carteira');
+  vals.forEach(v => msState[name].add(v));
+  buildMsList(name, vals);
+  updateMsTrigger(name);
+  render();
+}
+
+function clearAll(name) {
+  msState[name].clear();
+  const dataKey = name.toUpperCase();
+  const vals = getUniqueFiltered(dataKey, name==='Carteira');
+  buildMsList(name, vals);
+  updateMsTrigger(name);
+  render();
+}
+
+function toggleMs(name) {
+  const drop = document.getElementById('msDrop'+name);
+  const isOpen = drop.classList.contains('open');
+  // close all
+  document.querySelectorAll('.ms-dropdown').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) drop.classList.add('open');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if(!e.target.closest('.ms-wrapper')) {
+    document.querySelectorAll('.ms-dropdown').forEach(d=>d.classList.remove('open'));
+  }
+});
+
 function rebuildFilters() {
-  const rebuild=(sel,vals)=>{
-    const cur=sel.value; sel.innerHTML='<option value="ALL">Todos</option>';
-    vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(String(v)===cur)o.selected=true;sel.appendChild(o);});
-  };
-  rebuild(document.getElementById('filterEmpresa'),getUnique('EMPRESA'));
-  rebuild(document.getElementById('filterCarteira'),getUnique('CARTEIRA'));
-  rebuild(document.getElementById('filterCanal'),getUnique('CANAL'));
+  ['Empresa','Canal'].forEach(name => {
+    const dataKey = name.toUpperCase();
+    const vals = getUniqueFiltered(dataKey);
+    if(msState[name].size===0) vals.forEach(v=>msState[name].add(v));
+    buildMsList(name, vals);
+    updateMsTrigger(name);
+  });
+  // Carteira depends on empresa
+  const cartVals = getUniqueFiltered('CARTEIRA', true);
+  if(msState.Carteira.size===0) cartVals.forEach(v=>msState.Carteira.add(v));
+  buildMsList('Carteira', cartVals);
+  updateMsTrigger('Carteira');
 
   // Set date range defaults
-  const datas=getUnique('DATA_REF');
+  const datas = getUniqueFiltered('DATA_REF');
   const ini=document.getElementById('filterDateIni');
   const fim=document.getElementById('filterDateFim');
   if(!ini.value && datas.length) { ini.value=datas[0]; fim.value=datas[datas.length-1]; }
 }
 
 function getFiltered() {
-  const emp=document.getElementById('filterEmpresa').value;
-  const cart=document.getElementById('filterCarteira').value;
-  const canal=document.getElementById('filterCanal').value;
   const ini=document.getElementById('filterDateIni').value;
   const fim=document.getElementById('filterDateFim').value;
   return allData.filter(r=>{
-    if(emp!=='ALL'&&r.EMPRESA!==emp) return false;
-    if(cart!=='ALL'&&r.CARTEIRA!==cart) return false;
-    if(canal!=='ALL'&&r.CANAL!==canal) return false;
+    if(msState.Empresa.size>0 && !msState.Empresa.has(r.EMPRESA)) return false;
+    if(msState.Carteira.size>0 && !msState.Carteira.has(r.CARTEIRA)) return false;
+    if(msState.Canal.size>0 && !msState.Canal.has(r.CANAL)) return false;
     if(ini&&r.DATA_REF<ini) return false;
     if(fim&&r.DATA_REF>fim) return false;
     return true;
