@@ -2029,7 +2029,7 @@ function fmsBuild(key,vals){
 
 function fmsUpdateTrigger(key){
   const sel=FMS[key];
-  const allVals=_fmsAllVals(key);
+  const allVals=_fmsAvail(key);
   const trigger=document.getElementById('fmsTrigger-'+key);
   let txt;
   if(sel.size===0||sel.size===allVals.length) txt=FMS_DEFAULTS[key];
@@ -2041,31 +2041,58 @@ function fmsUpdateTrigger(key){
   trigger.style.borderColor=sel.size>0&&sel.size<allVals.length?'var(--accent)':'';
 }
 
-function _fmsAllVals(key){
+const EMP_DEPS={"Banco Original": {"carteiras": ["0162-Banco Original - PP BANK"], "meses": ["FEVEREIRO", "MARÇO"], "fases": ["Padrão"], "faixas": ["R$1k–2k", "R$2k–5k", "R$5k–10k"]}, "Banco do Brasil": {"carteiras": ["0150-Banco do Brasil - Consórcio", "0152-Banco do Brasil - Recovery"], "meses": ["SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["1 a 30", "31 a 60", "61 a 90", "91 a 180", "181 a 360", "361 a 720", "721 a 1080", "1081 a 1800", "maior que 1800"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k", "Acima R$10k"]}, "Kroton": {"carteiras": ["0266-Kroton PEP Presencial(RAID)", "0267-Kroton PEP EAD (RAID)", "0268-Anhanguera Campus (RAID)", "0269-Anhanguera EAD (RAID)", "0270-Unopar EAD - (RAID)", "0271-DM Presencial (RAID)", "0272-DM EAD (RAID)", "0276-Kroton PEP Presencial > 1800 (RAID)"], "meses": ["SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["Padrão"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k", "Acima R$10k"]}, "MERCADO PAGO": {"carteiras": ["CONSUMER", "MERCHANT", "POINT", "TARJETA_CREDITO"], "meses": ["DEZEMBRO", "JANEIRO", "FEVEREIRO"], "fases": ["1 - 0 a 30 Dias", "2 - 31 a 60 Dias", "3 - 61 a 90 Dias", "4 - 91 a 120 Dias", "5 - 121 a 180 Dias", "6 - 181 a 360 Dias", "7 - 361 a 720 Dias", "8 - Acima de 720 Dias"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "Acima R$10k"]}, "Movida": {"carteiras": ["0452-Movida Piloto", "1250-Movida", "1251-Movida Sem Garantia - ZERO KM", "1252-Movida - PJ", "1253-Movida - PJ S/ Veículos", "1255-Movida - Participações", "1256-Movida Memo"], "meses": ["SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["1 a 30", "31 a 60", "61 a 90", "91 a 180", "181 a 360", "361 a 720", "721 a 1080", "1081 a 1800", "maior que 1800"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k", "Acima R$10k"]}, "Porto Seguro": {"carteiras": ["1152-CDC Amigável", "1153-Porto Seguro Cartão"], "meses": ["SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["Até 180 dias", "181 até 360 dias", "Até 360 dias", "361 até 1080 dias", "1081 até 1800 dias", "Acima de 1800 dias"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k", "Acima R$10k"]}, "Pravaler": {"carteiras": ["0191-Pravaler Cyber"], "meses": ["JANEIRO", "FEVEREIRO"], "fases": ["Maior que 1800 dias", "Padrão"], "faixas": ["R$1k–2k", "R$5k–10k", "Acima R$10k"]}, "Santander": {"carteiras": ["0612-Santander Produto MOTOS", "0613-Santander Produto LEVES"], "meses": ["NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["0 - 31 a 90", "1 - 91 a 150", "2 - 151 a 210", "3 - 211 a 360", "4 - 361 a 720"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k", "Acima R$10k"]}, "Via Varejo": {"carteiras": ["0664-Via Varejo - FIDC/CDCI Prejuízo"], "meses": ["OUTUBRO", "NOVEMBRO", "DEZEMBRO", "JANEIRO", "FEVEREIRO", "MARÇO"], "fases": ["6 a 30", "31 a 60", "61 a 90", "91 a 120", "121 a 150", "151 a 180", "181 a 360"], "faixas": ["Até R$200", "R$201–500", "R$501–1k", "R$1k–2k", "R$2k–5k", "R$5k–10k"]}};
+function _fmsAvail(key){
+  const emps=[...FMS.Emp];
+  const hasEmpF=emps.length>0&&emps.length<PGTO_DATA.empresas.length;
   if(key==='Emp') return PGTO_DATA.empresas;
-  if(key==='Cart') return PGTO_DATA.carteiras;
-  if(key==='Mes') return PGTO_DATA.meses;
-  if(key==='Fase') return PGTO_DATA.fases;
-  if(key==='Faixa') return PGTO_DATA.faixa_val.map(f=>f['FAIXA_VALOR']);
   if(key==='Status') return ['PAGO','QUEBRA'];
+  if(!hasEmpF){
+    if(key==='Cart') return PGTO_DATA.carteiras;
+    if(key==='Mes') return PGTO_DATA.meses;
+    if(key==='Fase') return PGTO_DATA.fases;
+    if(key==='Faixa') return PGTO_DATA.faixa_val.map(f=>f['FAIXA_VALOR']);
+  }
+  const sets={Cart:new Set(),Mes:new Set(),Fase:new Set(),Faixa:new Set()};
+  emps.forEach(e=>{const d=EMP_DEPS[e];if(!d)return;
+    d.carteiras.forEach(v=>sets.Cart.add(v));d.meses.forEach(v=>sets.Mes.add(v));
+    d.fases.forEach(v=>sets.Fase.add(v));d.faixas.forEach(v=>sets.Faixa.add(v));
+  });
+  if(key==='Cart') return PGTO_DATA.carteiras.filter(v=>sets.Cart.has(v));
+  if(key==='Mes')  return PGTO_DATA.meses.filter(v=>sets.Mes.has(v));
+  if(key==='Fase') return PGTO_DATA.fases.filter(v=>sets.Fase.has(v));
+  if(key==='Faixa') return PGTO_DATA.faixa_val.map(f=>f['FAIXA_VALOR']).filter(v=>sets.Faixa.has(v));
   return [];
+}
+function _fmsAllVals(key){return _fmsAvail(key);}
+function _rebuildDependents(changedKey){
+  if(changedKey==='Emp'){
+    ['Cart','Mes','Fase','Faixa'].forEach(k=>{
+      const avail=_fmsAvail(k);
+      [...FMS[k]].forEach(v=>{if(!avail.includes(v))FMS[k].delete(v);});
+      fmsBuild(k,avail); fmsUpdateTrigger(k);
+    });
+  }
 }
 
 function fmsChange(key,val,checked){
   if(checked) FMS[key].add(val); else FMS[key].delete(val);
   fmsUpdateTrigger(key);
+  _rebuildDependents(key);
   _applyFin();
   _renderDuTable();
 }
 
 function fmsAll(key){
-  _fmsAllVals(key).forEach(v=>FMS[key].add(v));
-  fmsBuild(key,_fmsAllVals(key)); fmsUpdateTrigger(key); _applyFin();
+  _fmsAvail(key).forEach(v=>FMS[key].add(v));
+  fmsBuild(key,_fmsAvail(key)); fmsUpdateTrigger(key);
+  _rebuildDependents(key); _applyFin();
 }
 
 function fmsClear(key){
   FMS[key].clear();
-  fmsBuild(key,_fmsAllVals(key)); fmsUpdateTrigger(key); _applyFin();
+  fmsBuild(key,_fmsAvail(key)); fmsUpdateTrigger(key);
+  _rebuildDependents(key); _applyFin();
 }
 
 function fmsToggle(key){
@@ -2077,7 +2104,7 @@ function fmsToggle(key){
 
 function _finBoot(){
   ['Emp','Cart','Mes','Fase','Faixa','Status'].forEach(k=>{
-    fmsBuild(k,_fmsAllVals(k));
+    fmsBuild(k,_fmsAvail(k));
     fmsUpdateTrigger(k);
   });
   _applyFin();
@@ -2094,9 +2121,9 @@ function _applyFin(){
 }
 
 function resetFinFilters(){
+  ['Emp','Cart','Mes','Fase','Faixa','Status'].forEach(k=>FMS[k].clear());
   ['Emp','Cart','Mes','Fase','Faixa','Status'].forEach(k=>{
-    FMS[k].clear();
-    fmsBuild(k,_fmsAllVals(k)); fmsUpdateTrigger(k);
+    fmsBuild(k,_fmsAvail(k)); fmsUpdateTrigger(k);
   });
   _applyFin();
 }
@@ -2222,7 +2249,9 @@ function _renderFinCharts(recs){
       {label:'Quebra',data:mk.map(m=>mm[m].quebra),backgroundColor:'rgba(248,81,73,0.4)',borderColor:'#f85149',borderWidth:1.5},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:TICK,font:{size:10}}},datalabels:{display:false}},
+      plugins:{legend:{labels:{color:TICK,font:{size:10}}},
+        datalabels:{display:true,anchor:'end',align:'end',color:TICK,font:{size:9,weight:'bold'},
+          formatter:v=>v>0?Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1}).format(v):'',clamp:true}},
       scales:{x:{ticks:{color:TICK,font:{size:10}},grid:{color:GRID}},
               y:{ticks:{color:TICK,font:{size:10},callback:v=>'R$'+Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1}).format(v)},grid:{color:GRID}}}}});
 
@@ -2232,7 +2261,8 @@ function _renderFinCharts(recs){
       borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,0.12)',fill:true,tension:.35,
       pointRadius:5,pointBackgroundColor:mk.map(m=>{const v=mm[m].ct?mm[m].cp/mm[m].ct*100:0;return $C(v);}),pointBorderColor:'#0d1117',pointBorderWidth:1.5}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:TICK,font:{size:10}}},datalabels:{display:false}},
+      plugins:{legend:{labels:{color:TICK,font:{size:10}}},
+        datalabels:{display:true,anchor:'top',align:'top',color:TICK,font:{size:10,weight:'bold'},formatter:v=>v.toFixed(1)+'%'}},
       scales:{x:{ticks:{color:TICK,font:{size:10}},grid:{color:GRID}},
               y:{min:0,max:100,ticks:{color:TICK,font:{size:10},callback:v=>v+'%'},grid:{color:GRID}}}}});
 
@@ -2246,7 +2276,8 @@ function _renderFinCharts(recs){
       backgroundColor:dKeys.map((_,i)=>`hsla(${200-i*20},80%,55%,0.6)`),
       borderColor:dKeys.map((_,i)=>`hsla(${200-i*20},80%,55%,1)`),borderWidth:1.5}]},
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-      plugins:{legend:{display:false},datalabels:{display:false}},
+      plugins:{legend:{display:false},
+        datalabels:{display:true,anchor:'end',align:'end',color:TICK,font:{size:10,weight:'bold'},formatter:v=>v>0?$N(v):''}},
       scales:{x:{ticks:{color:TICK,font:{size:10}},grid:{color:GRID}},y:{ticks:{color:TICK,font:{size:10}},grid:{color:GRID}}}}});
 
   // Empresa donut
@@ -2258,7 +2289,9 @@ function _renderFinCharts(recs){
   _fc['cFinEmp']=new Chart(document.getElementById('cFinEmp'),{type:'doughnut',
     data:{labels:ek,datasets:[{data:ek.map(k=>em[k]),backgroundColor:eColors,borderColor:'#0d1117',borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-      plugins:{legend:{position:'right',labels:{color:TICK,font:{size:10},boxWidth:12,padding:8}},datalabels:{display:false}}}});
+      plugins:{legend:{position:'right',labels:{color:TICK,font:{size:10},boxWidth:12,padding:8}},
+        datalabels:{display:true,color:'#fff',font:{size:10,weight:'bold'},
+          formatter:(v,ctx)=>{const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);const p=v/tot*100;return p>=5?p.toFixed(1)+'%':'';}}}}});
 
   // Faixa Valor bars
   const fvO=['Até R$200','R$201–500','R$501–1k','R$1k–2k','R$2k–5k','R$5k–10k','Acima R$10k'];
@@ -2893,19 +2926,19 @@ function _finRenderAcoes(S){
   const pc={P1:'#f85149',P2:'#d29922',P3:'#3fb950'};
   const pd={P1:'Imediato',P2:'Esta semana',P3:'2 semanas'};
 
-  if(fvWorst&&fvWorst.tx<20) acoes.push({p:'P1',resp:'CURADOR DE SCRIPT',prazo:'48h',acao:`Reescrever script para a faixa <b>${fvWorst.f}</b>: testar abertura com desconto máximo, argumento de parcelamento entrada zero e linguagem "última oportunidade". Meta: elevar taxa de ${$P(fvWorst.tx)} para 30%+ em 30 dias. Formato A/B: 50% novo script vs 50% atual.`});
-  if(fasWorst&&fasWorst.tx<20) acoes.push({p:'P1',resp:'CURADOR DE SCRIPT',prazo:'48h',acao:`Criar variante de script para fase <b>${fasWorst.f}</b>: abrir com reconhecimento empático do tempo de atraso, oferta exclusiva "fora do padrão" e CTA de pagamento imediato. Após 2 tentativas sem acordo, escalar para negociador humano automaticamente.`});
-  if(pctD0D1<40) acoes.push({p:'P1',resp:'ENGENHARIA',prazo:'48h',acao:`Implementar disparo automático de link de pagamento (SMS + WhatsApp) em até 15 minutos após fechamento do acordo pelo robô. Medir taxa de pagamento D0/D1 antes e depois. Meta: elevar de ${$P(pctD0D1)} para 60%+ em 30 dias.`});
-  if(txGeral<35) acoes.push({p:'P1',resp:'PRODUTO + CURADORIA',prazo:'Esta semana',acao:`Adicionar etapa de confirmação de compromisso no encerramento do robô: confirmação verbal da data, valor e forma de pagamento. Testar redução do prazo máximo de parcelamento em 20% e medir impacto na quebra.`});
+  if(fvWorst&&fvWorst.tx<20) acoes.push({p:'P1',resp:'MONITORIA & QUALIDADE',prazo:'48h',acao:`Reescrever script para a faixa <b>${fvWorst.f}</b>: testar abertura com desconto máximo, argumento de parcelamento entrada zero e linguagem "última oportunidade". Meta: elevar taxa de ${$P(fvWorst.tx)} para 30%+ em 30 dias. Formato A/B: 50% novo script vs 50% atual.`});
+  if(fasWorst&&fasWorst.tx<20) acoes.push({p:'P1',resp:'MONITORIA & QUALIDADE',prazo:'48h',acao:`Criar variante de script para fase <b>${fasWorst.f}</b>: abrir com reconhecimento empático do tempo de atraso, oferta exclusiva "fora do padrão" e CTA de pagamento imediato. Após 2 tentativas sem acordo, escalar para negociador humano automaticamente.`});
+  if(pctD0D1<40) acoes.push({p:'P1',resp:'FORNECEDOR',prazo:'48h',acao:`Implementar disparo automático de link de pagamento (SMS + WhatsApp) em até 15 minutos após fechamento do acordo pelo robô. Medir taxa de pagamento D0/D1 antes e depois. Meta: elevar de ${$P(pctD0D1)} para 60%+ em 30 dias.`});
+  if(txGeral<35) acoes.push({p:'P1',resp:'PLANEJAMENTO + MON.QUAL',prazo:'Esta semana',acao:`Adicionar etapa de confirmação de compromisso no encerramento do robô: confirmação verbal da data, valor e forma de pagamento. Testar redução do prazo máximo de parcelamento em 20% e medir impacto na quebra.`});
 
-  if(diasMed>5) acoes.push({p:'P2',resp:'ENGENHARIA',prazo:'Esta semana',acao:`Programar régua de follow-up pós-acordo: D+1 lembrete amigável, D+2 alerta de vencimento com urgência, D+3 oferta de renegociação emergencial com desconto adicional. Testar robô de voz para D+2 (não só SMS). Meta: reduzir prazo médio de ${diasMed.toFixed(1)} para abaixo de 3 dias.`});
-  if(fvBest&&fvBest.tx>=50) acoes.push({p:'P2',resp:'OPERAÇÕES',prazo:'Esta semana',acao:`Reconfigurar prioridade de discagem para carteiras com maior concentração na faixa <b>${fvBest.f}</b>. Documentar parâmetros do script atual (% desconto, prazo, argumentos chave) como template de referência para curadoria de outras faixas.`});
-  if(fasBest&&fasBest.tx>=45) acoes.push({p:'P2',resp:'OPERAÇÕES',prazo:'Esta semana',acao:`Aumentar volume de acionamentos na fase <b>${fasBest.f}</b> em 20–30%. Criar campanha focada com script otimizado. Monitorar taxa semanal para garantir que o aumento de volume não deteriora a conversão.`});
-  if(empBest) acoes.push({p:'P2',resp:'CURADOR DE SCRIPT',prazo:'Esta semana',acao:`Analisar script e parâmetros usados na carteira <b>${empBest.e}</b> (taxa ${$P(empBest.tx)}): mapear argumentos, % desconto e prazo de parcelamento. Criar playbook e testar nas 3 empresas com menor performance.`});
+  if(diasMed>5) acoes.push({p:'P2',resp:'FORNECEDOR',prazo:'Esta semana',acao:`Programar régua de follow-up pós-acordo: D+1 lembrete amigável, D+2 alerta de vencimento com urgência, D+3 oferta de renegociação emergencial com desconto adicional. Testar robô de voz para D+2 (não só SMS). Meta: reduzir prazo médio de ${diasMed.toFixed(1)} para abaixo de 3 dias.`});
+  if(fvBest&&fvBest.tx>=50) acoes.push({p:'P2',resp:'CONTROLDESK',prazo:'Esta semana',acao:`Reconfigurar prioridade de discagem para carteiras com maior concentração na faixa <b>${fvBest.f}</b>. Documentar parâmetros do script atual (% desconto, prazo, argumentos chave) como template de referência para curadoria de outras faixas.`});
+  if(fasBest&&fasBest.tx>=45) acoes.push({p:'P2',resp:'CONTROLDESK',prazo:'Esta semana',acao:`Aumentar volume de acionamentos na fase <b>${fasBest.f}</b> em 20–30%. Criar campanha focada com script otimizado. Monitorar taxa semanal para garantir que o aumento de volume não deteriora a conversão.`});
+  if(empBest) acoes.push({p:'P2',resp:'MONITORIA & QUALIDADE',prazo:'Esta semana',acao:`Analisar script e parâmetros usados na carteira <b>${empBest.e}</b> (taxa ${$P(empBest.tx)}): mapear argumentos, % desconto e prazo de parcelamento. Criar playbook e testar nas 3 empresas com menor performance.`});
 
-  acoes.push({p:'P3',resp:'DADOS + PRODUTO',prazo:'2 semanas',acao:`Construir score pré-chamada com variáveis: fase de atraso, faixa de valor, empresa e histórico de acionamentos. Testar ordenação da fila por score vs aleatório e medir diferença de taxa em 30 dias. Objetivo: aumentar aproveitamento por hora de operação do robô.`});
-  acoes.push({p:'P3',resp:'CURADORIA',prazo:'2 semanas',acao:`Desenvolver árvore de scripts segmentada: (1) Dívidas até R$1k — quitação total, desconto alto, tom direto; (2) R$1k–5k — parcelamento com entrada; (3) Acima de R$5k — entrada obrigatória, parcelas curtas, tom consultivo. Implementar roteamento automático por faixa detectada.`});
-  acoes.push({p:'P3',resp:'PRODUTO',prazo:'2 semanas',acao:`Criar dashboard operacional do robô: taxa de fechamento por script, taxa de pagamento D0/D1/D3 por campanha, e alerta automático quando taxa cair >3p.p. vs média histórica. Visão semanal para reunião de curadoria.`});
+  acoes.push({p:'P3',resp:'PLANEJAMENTO + DADOS',prazo:'2 semanas',acao:`Construir score pré-chamada com variáveis: fase de atraso, faixa de valor, empresa e histórico de acionamentos. Testar ordenação da fila por score vs aleatório e medir diferença de taxa em 30 dias. Objetivo: aumentar aproveitamento por hora de operação do robô.`});
+  acoes.push({p:'P3',resp:'MONITORIA & QUALIDADE',prazo:'2 semanas',acao:`Desenvolver árvore de scripts segmentada: (1) Dívidas até R$1k — quitação total, desconto alto, tom direto; (2) R$1k–5k — parcelamento com entrada; (3) Acima de R$5k — entrada obrigatória, parcelas curtas, tom consultivo. Implementar roteamento automático por faixa detectada.`});
+  acoes.push({p:'P3',resp:'PLANEJAMENTO',prazo:'2 semanas',acao:`Criar dashboard operacional do robô: taxa de fechamento por script, taxa de pagamento D0/D1/D3 por campanha, e alerta automático quando taxa cair >3p.p. vs média histórica. Visão semanal para reunião de curadoria.`});
 
   const sorted=acoes.sort((a,b)=>a.p.localeCompare(b.p)).slice(0,11);
   let h=`<div style="display:flex;flex-direction:column;gap:8px">`;
